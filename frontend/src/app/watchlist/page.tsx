@@ -13,13 +13,13 @@ export default function Watchlist() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Watchlist</h1>
+      <h1 className="text-2xl font-bold mb-6">股票池</h1>
       <table className="w-full bg-white rounded shadow">
         <thead>
           <tr className="border-b">
-            <th className="p-3 text-left">Ticker</th>
-            <th className="p-3 text-left">Status</th>
-            <th className="p-3 text-left">Recent Signal</th>
+            <th className="p-3 text-left">股票代码</th>
+            <th className="p-3 text-left">状态</th>
+            <th className="p-3 text-left">最新信号</th>
           </tr>
         </thead>
         <tbody>
@@ -28,7 +28,7 @@ export default function Watchlist() {
             return (
               <tr key={s.ticker} className="border-b hover:bg-gray-50">
                 <td className="p-3 font-mono font-bold">{s.ticker}</td>
-                <td className="p-3">{s.is_active ? "Active" : "Inactive"}</td>
+                <td className="p-3">{s.is_active ? "活跃" : "暂停"}</td>
                 <td className="p-3">{sig ? `${sig.type}: ${sig.reason || sig.strategy || ""}` : "—"}</td>
               </tr>
             );

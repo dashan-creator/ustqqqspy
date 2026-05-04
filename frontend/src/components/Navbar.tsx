@@ -3,18 +3,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/", label: "Dashboard" },
-  { href: "/watchlist", label: "Watchlist" },
-  { href: "/trades", label: "Trades" },
-  { href: "/strategy", label: "Strategy" },
-  { href: "/risk", label: "Risk" },
+  { href: "/", label: "总览" },
+  { href: "/watchlist", label: "股票池" },
+  { href: "/trades", label: "交易日志" },
+  { href: "/strategy", label: "策略" },
+  { href: "/risk", label: "风控" },
 ];
 
 export function Navbar() {
   const pathname = usePathname();
   return (
     <nav className="bg-gray-900 text-white p-4 flex gap-6">
-      <span className="font-bold text-lg">USStock</span>
+      <span className="font-bold text-lg">USStock 量化交易</span>
       {links.map((l) => (
         <Link
           key={l.href}
