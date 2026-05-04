@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Database
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/usstock"
+    database_url: str = "sqlite+aiosqlite:///./usstock.db"
     # Redis
     redis_url: str = "redis://localhost:6379/0"
     # LLM
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     max_daily_loss_pct: float = 0.01
     max_weekly_loss_pct: float = 0.04
     max_concurrent_positions: int = 2
-    max_single_position_pct: float = 0.02
+    max_single_position_pct: float = 2.0
     consecutive_loss_limit: int = 3
     # App
     debug: bool = False

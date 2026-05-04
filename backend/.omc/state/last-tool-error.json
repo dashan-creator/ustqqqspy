@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd /home/du/project/usstock && python -c \\\"from app.config import settings; print('Config OK, symbols:', settings.symbol_list[:3])\\\"\",\"description\":\"Verify config module loads correctly\"}",
-  "error": "Exit code 127\n/bin/bash: line 1: python: command not found",
-  "timestamp": "2026-05-04T08:27:09.379Z",
+  "tool_input_preview": "{\"command\":\"git push -u origin master 2>&1\",\"description\":\"Push to GitHub\"}",
+  "error": "Exit code 128\nfatal: unable to access 'https://github.com/dashan-creator/usstock.git/': gnutls_handshake() failed: The TLS connection was non-properly terminated.",
+  "timestamp": "2026-05-04T08:57:43.760Z",
   "retry_count": 1
 }

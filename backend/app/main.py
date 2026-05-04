@@ -24,17 +24,25 @@ async def lifespan(app: FastAPI):
     scheduler = create_scheduler()
     scheduler.start()
 
-    tg_app = create_bot()
-    if tg_app:
-        await tg_app.initialize()
-        await tg_app.start()
-        await tg_app.updater.start_polling()
+    tg_app = None
+    try:
+        tg_app = create_bot()
+        if tg_app:
+            await tg_app.initialize()
+            await tg_app.start()
+            await tg_app.updater.start_polling()
+    except Exception as e:
+        logging.warning("Telegram bot failed to start: %s", e)
+        tg_app = None
 
     yield
 
-    if tg_app:
-        await tg_app.updater.stop()
-        await tg_app.stop()
+    try:
+        if tg_app:
+            await tg_app.updater.stop()
+            await tg_app.stop()
+    except Exception:
+        pass
     scheduler.shutdown()
 
 
