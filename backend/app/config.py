@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     # Telegram
     telegram_bot_token: str = ""
     telegram_chat_id: str = ""
+    # IBKR
+    ibkr_host: str = "127.0.0.1"
+    ibkr_port: int = 7497
+    ibkr_client_id: int = 1
+    use_ibkr: bool = False  # True = IBKR Paper Trading, False = in-memory paper trader
     # Trading
     symbols: str = "SPY,QQQ,AAPL,MSFT,NVDA,TSLA,META,AMZN,GOOGL,AMD"
     scan_interval_minutes: int = 5

@@ -15,9 +15,21 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelna
 async def lifespan(app: FastAPI):
     await init_db()
 
+    from app.config import settings
     from app.pipeline.scanner import scanner_pipeline
     from app.scheduler.market_scanner import create_scheduler
     from app.telegram.bot import create_bot, set_pipeline
+
+    # IBKR connection (optional)
+    if settings.use_ibkr:
+        from app.execution.broker import IBKRBroker
+        broker = IBKRBroker(host=settings.ibkr_host, port=settings.ibkr_port, client_id=settings.ibkr_client_id)
+        connected = await broker.connect()
+        if connected:
+            scanner_pipeline.ibkr_broker = broker
+            logging.info("IBKR Paper Trading connected at %s:%d", settings.ibkr_host, settings.ibkr_port)
+        else:
+            logging.warning("IBKR connection failed, falling back to paper trader")
 
     set_pipeline(scanner_pipeline)
 
@@ -43,6 +55,8 @@ async def lifespan(app: FastAPI):
             await tg_app.stop()
     except Exception:
         pass
+    if scanner_pipeline.ibkr_broker:
+        scanner_pipeline.ibkr_broker.disconnect()
     scheduler.shutdown()
 
 

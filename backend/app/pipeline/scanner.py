@@ -29,6 +29,7 @@ class ScannerPipeline:
         self.position_manager = PositionManager()
         self.trader = PaperTrader()
         self.order_manager = OrderManager(self.trader)
+        self.ibkr_broker = None  # Set by main.py if IBKR mode enabled
         self.daily_pnl = 0.0
         self.weekly_pnl = 0.0
         self.consecutive_losses = 0
@@ -111,10 +112,16 @@ class ScannerPipeline:
             if quantity <= 0:
                 continue
 
-            order = self.order_manager.execute_signal(signal, quantity)
+            # Execute via IBKR if available, otherwise paper trader
+            if self.ibkr_broker and self.ibkr_broker.is_connected:
+                order = self.ibkr_broker.place_market_order(ticker, quantity, "buy")
+                order["strategy"] = signal["strategy_name"]
+            else:
+                order = self.order_manager.execute_signal(signal, quantity)
 
             return {
                 "type": "signal_executed", "ticker": ticker,
+                "broker": "ibkr" if (self.ibkr_broker and self.ibkr_broker.is_connected) else "paper",
                 "strategy": signal["strategy_name"],
                 "direction": signal["direction"],
                 "entry_price": signal["entry_price"],
@@ -130,6 +137,15 @@ class ScannerPipeline:
         return None
 
     def get_status(self) -> dict:
+        ibkr_status = "not_configured"
+        ibkr_account = {}
+        if self.ibkr_broker:
+            if self.ibkr_broker.is_connected:
+                ibkr_status = "connected"
+                ibkr_account = self.ibkr_broker.get_account_summary()
+            else:
+                ibkr_status = "disconnected"
+
         return {
             "circuit_breaker_paused": self.circuit_breaker.is_paused,
             "circuit_breaker_reason": self.circuit_breaker.pause_reason,
@@ -138,6 +154,9 @@ class ScannerPipeline:
             "stats": self.trader.get_stats(),
             "daily_pnl": self.daily_pnl,
             "consecutive_losses": self.consecutive_losses,
+            "broker": "ibkr" if (self.ibkr_broker and self.ibkr_broker.is_connected) else "paper",
+            "ibkr_status": ibkr_status,
+            "ibkr_account": ibkr_account,
         }
 
 
