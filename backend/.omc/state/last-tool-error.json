@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /home/du/project/usstock && python -c \\\"from app.config import settings; print('Config OK, symbols:', settings.symbol_list[:3])\\\"\",\"description\":\"Verify config module loads correctly\"}",
+  "error": "Exit code 127\n/bin/bash: line 1: python: command not found",
+  "timestamp": "2026-05-04T08:27:09.379Z",
+  "retry_count": 1
+}

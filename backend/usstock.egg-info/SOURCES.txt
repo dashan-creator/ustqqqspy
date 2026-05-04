@@ -1,0 +1,8 @@
+pyproject.toml
+app/__init__.py
+app/config.py
+usstock.egg-info/PKG-INFO
+usstock.egg-info/SOURCES.txt
+usstock.egg-info/dependency_links.txt
+usstock.egg-info/requires.txt
+usstock.egg-info/top_level.txt
