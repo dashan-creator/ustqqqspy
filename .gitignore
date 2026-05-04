@@ -12,3 +12,5 @@ node_modules/
 .mypy_cache/
 .ruff_cache/
 .omc/
+*.db
+next-env.d.ts
