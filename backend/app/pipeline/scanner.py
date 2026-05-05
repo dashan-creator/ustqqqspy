@@ -180,13 +180,16 @@ class ScannerPipeline:
 
         return None
 
-    def get_status(self) -> dict:
+    async def get_status(self) -> dict:
         ibkr_status = "not_configured"
         ibkr_account = {}
         if self.ibkr_broker:
             if self.ibkr_broker.is_connected:
                 ibkr_status = "connected"
-                ibkr_account = await self.ibkr_broker.get_account_summary()
+                try:
+                    ibkr_account = await self.ibkr_broker.get_account_summary()
+                except Exception:
+                    ibkr_account = {}
             else:
                 ibkr_status = "disconnected"
 
@@ -204,7 +207,6 @@ class ScannerPipeline:
         }
 
 
-scanner_pipeline = ScannerPipeline()
     async def _persist_llm_report(self, symbol_id: int | None, report_type: str, source_text: str, llm_result: dict) -> None:
         try:
             async with async_session() as session:
@@ -225,3 +227,5 @@ scanner_pipeline = ScannerPipeline()
                 await session.commit()
         except Exception:
             logger.exception('Failed to persist LLM report')
+
+scanner_pipeline = ScannerPipeline()

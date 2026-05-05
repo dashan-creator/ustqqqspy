@@ -11,4 +11,4 @@ router = APIRouter(prefix="/api/risk", tags=["risk"])
 @router.get("/status")
 async def risk_status(_admin: None = Depends(require_admin)):
     pipeline = get_pipeline()
-    return pipeline.get_status()
+    return await pipeline.get_status()

@@ -26,7 +26,7 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not _pipeline:
         await update.message.reply_text("Pipeline not initialized")
         return
-    s = _pipeline.get_status()
+    s = await _pipeline.get_status()
     msg = (
         f"System: {'PAUSED' if s['circuit_breaker_paused'] else 'RUNNING'}\n"
         f"Cash: ${s['cash']:,.2f}\n"
@@ -97,7 +97,7 @@ async def cmd_risk(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     if not _pipeline:
         return
-    s = _pipeline.get_status()
+    s = await _pipeline.get_status()
     msg = (
         f"Circuit Breaker: {'ON' if s['circuit_breaker_paused'] else 'OFF'}\n"
         f"Reason: {s['circuit_breaker_reason'] or 'None'}\n"
