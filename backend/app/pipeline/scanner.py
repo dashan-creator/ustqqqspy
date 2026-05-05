@@ -125,6 +125,13 @@ class ScannerPipeline:
                 except Exception:
                     logger.warning("News analysis failed for %s", ticker)
 
+            # Build position and account context for LLM
+            pos_lines = []
+            for t, p in self.trader.positions.items():
+                pos_lines.append(f"  {t}: {p['quantity']}股 @ ${p['avg_price']:.2f} [{p['strategy']}]")
+            current_positions = "\n".join(pos_lines) if pos_lines else "无持仓"
+            account_state = f"可用资金: ${self.trader.cash:,.2f}\n累计盈亏: ${self.trader.get_total_pnl():,.2f}\n当日盈亏: ${self.daily_pnl:,.2f}\n连续亏损: {self.consecutive_losses}笔"
+
             llm_result = await review_risk(
                 ticker=ticker,
                 strategy=signal["strategy_name"],
@@ -133,6 +140,8 @@ class ScannerPipeline:
                 position_pct=settings.max_single_position_pct,
                 market_state=f"QQQ {market['change_pct']:+.2f}%",
                 news_summary=news_summary,
+                current_positions=current_positions,
+                account_state=account_state,
             )
 
             llm_action = llm_result.get("action", "approve")

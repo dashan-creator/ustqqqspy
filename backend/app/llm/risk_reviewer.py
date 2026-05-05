@@ -22,6 +22,8 @@ async def review_risk(
     position_pct: float,
     market_state: str,
     news_summary: str,
+    current_positions: str = "",
+    account_state: str = "",
 ) -> dict:
     user_prompt = (
         f"交易信号:\n- 股票: {ticker}\n- 策略: {strategy}\n"
@@ -29,4 +31,8 @@ async def review_risk(
         f"- 仓位: {position_pct}%\n- 大盘: {market_state}\n"
         f"- 新闻: {news_summary}"
     )
+    if current_positions:
+        user_prompt += f"\n\n当前持仓:\n{current_positions}"
+    if account_state:
+        user_prompt += f"\n\n账户状态:\n{account_state}"
     return await chat(SYSTEM_PROMPT, user_prompt, timeout=30.0)
