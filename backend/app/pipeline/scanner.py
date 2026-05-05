@@ -6,7 +6,10 @@ from datetime import datetime, timezone
 from app.config import settings
 from app.market.data_service import market_data_service
 from app.strategy import STRATEGIES
-from app.llm import review_risk
+from app.llm import review_risk, analyze_news
+from app.news import NewsService
+from app.news.adapters.finnhub import FinnhubAdapter
+from app.news.adapters.polygon import PolygonAdapter
 from app.models.llm_report import LLMReport
 from app.models.db import async_session
 from app.risk import CircuitBreaker, HardRiskChecker, PositionManager
@@ -31,6 +34,13 @@ class ScannerPipeline:
         self.position_manager = PositionManager()
         self.trader = PaperTrader()
         self.order_manager = OrderManager(self.trader)
+        # Initialize news service with available adapters
+        news_adapters = []
+        if settings.finnhub_api_key:
+            news_adapters.append(FinnhubAdapter(api_key=settings.finnhub_api_key))
+        if settings.polygon_api_key:
+            news_adapters.append(PolygonAdapter(api_key=settings.polygon_api_key))
+        self.news_service = NewsService(adapters=news_adapters, cache_ttl=settings.news_cache_ttl_seconds)
         self.ibkr_broker = None  # Set by main.py if IBKR mode enabled
         self.daily_pnl = 0.0
         self.weekly_pnl = 0.0
@@ -89,6 +99,22 @@ class ScannerPipeline:
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
 
+            # Fetch news for this ticker
+            news_items = await self.news_service.get_ticker_news(ticker)
+            news_summary = "; ".join(n.headline for n in news_items[:5]) or "无相关新闻"
+
+            # Analyze news with LLM (best-effort)
+            if news_items:
+                try:
+                    await analyze_news(
+                        ticker=ticker,
+                        headline=news_items[0].headline,
+                        price_change=f"{market['change_pct']:+.2f}%",
+                        market_state=f"QQQ {market['change_pct']:+.2f}%",
+                    )
+                except Exception:
+                    logger.warning("News analysis failed for %s", ticker)
+
             llm_result = await review_risk(
                 ticker=ticker,
                 strategy=signal["strategy_name"],
@@ -96,7 +122,7 @@ class ScannerPipeline:
                 stop_loss=signal["stop_loss"],
                 position_pct=settings.max_single_position_pct,
                 market_state=f"QQQ {market['change_pct']:+.2f}%",
-                news_summary="V0: no news service yet",
+                news_summary=news_summary,
             )
 
             llm_action = llm_result.get("action", "approve")

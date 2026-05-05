@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     ibkr_port: int = 7497
     ibkr_client_id: int = 1
     use_ibkr: bool = False  # True = IBKR Paper Trading, False = in-memory paper trader
+    # News
+    finnhub_api_key: str = ""
+    polygon_api_key: str = ""
+    news_cache_ttl_seconds: int = 300
     # Trading
     symbols: str = "SPY,QQQ,AAPL,MSFT,NVDA,TSLA,META,AMZN,GOOGL,AMD"
     scan_interval_minutes: int = 5
