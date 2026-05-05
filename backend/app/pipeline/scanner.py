@@ -15,6 +15,7 @@ from app.models.db import async_session
 from app.risk import CircuitBreaker, HardRiskChecker, PositionManager
 from app.execution.paper_trader import PaperTrader
 from app.execution.order_manager import OrderManager
+from app.execution.persistence import persist_signal, persist_order, persist_trade
 
 logger = logging.getLogger(__name__)
 
@@ -140,12 +141,18 @@ class ScannerPipeline:
             if quantity <= 0:
                 continue
 
+            # Persist signal to DB
+            await persist_signal(signal)
+
             # Execute via IBKR if available, otherwise paper trader
             if self.ibkr_broker and self.ibkr_broker.is_connected:
                 order = await self.ibkr_broker.place_market_order(ticker, quantity, "buy")
                 order["strategy"] = signal["strategy_name"]
             else:
                 order = self.order_manager.execute_signal(signal, quantity)
+
+            # Persist order to DB
+            await persist_order(order)
 
             return {
                 "type": "signal_executed", "ticker": ticker,
