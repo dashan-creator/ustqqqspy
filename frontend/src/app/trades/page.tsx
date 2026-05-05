@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { api } from "@/lib/api";
 
 export default function Trades() {
@@ -7,9 +8,32 @@ export default function Trades() {
 
   useEffect(() => { api.getTrades().then(setTrades).catch(() => {}); }, []);
 
+  const chartData = trades
+    .filter((t) => t.pnl !== undefined)
+    .map((t, i) => ({
+      name: t.ticker || `#${i + 1}`,
+      pnl: t.pnl,
+    }));
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">交易日志</h1>
+
+      {chartData.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-4 mb-6">
+          <h2 className="text-lg font-bold mb-4">每笔盈亏</h2>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="pnl" fill="#3b82f6" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
       <table className="w-full bg-white rounded shadow">
         <thead>
           <tr className="border-b">
