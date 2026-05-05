@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.api import market, signals, trades, risk, system
+from app.api import market, signals, trades, risk, system, websocket
 from app.models.db import init_db
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s: %(message)s")
@@ -67,6 +67,7 @@ app.include_router(signals.router)
 app.include_router(trades.router)
 app.include_router(risk.router)
 app.include_router(system.router)
+app.include_router(websocket.router)
 
 
 @app.get("/")

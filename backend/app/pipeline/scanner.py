@@ -69,6 +69,15 @@ class ScannerPipeline:
                 events.append({"type": "error", "ticker": ticker, "error": str(e)})
 
         self.last_scan_results = events
+
+        # Broadcast events via WebSocket
+        try:
+            from app.api.websocket import broadcast
+            for event in events:
+                await broadcast(event)
+        except Exception:
+            logger.warning("WebSocket broadcast failed")
+
         return events
 
     async def _scan_symbol(self, ticker: str, market: dict) -> dict | None:
