@@ -14,7 +14,13 @@ class PaperTrader:
         self.orders: list[dict] = []
 
     def buy(self, ticker: str, quantity: int, price: float, strategy: str, reason: str) -> dict:
+        if quantity <= 0 or price <= 0:
+            return {'ticker': ticker, 'side': 'buy', 'quantity': quantity, 'filled_price': price, 'status': 'rejected', 'strategy': strategy, 'reason': 'invalid order', 'timestamp': ''}
+
         cost = quantity * price
+        if cost > self.cash:
+            return {'ticker': ticker, 'side': 'buy', 'quantity': quantity, 'filled_price': price, 'status': 'rejected', 'strategy': strategy, 'reason': 'insufficient cash', 'timestamp': ''}
+
         self.cash -= cost
 
         if ticker in self.positions:

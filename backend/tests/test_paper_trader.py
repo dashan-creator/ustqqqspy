@@ -40,3 +40,19 @@ def test_unrealized_pnl(trader):
     trader.buy("AAPL", quantity=100, price=180.0, strategy="breakout", reason="test")
     pnl = trader.get_unrealized_pnl("AAPL", current_price=190.0)
     assert pnl == 1000.0
+
+def test_buy_rejects_invalid(trader):
+    order = trader.buy("NVDA", quantity=0, price=100.0, strategy="breakout", reason="bad qty")
+    assert order["status"] == "rejected"
+    assert "NVDA" not in trader.positions
+
+    order = trader.buy("NVDA", quantity=1, price=0.0, strategy="breakout", reason="bad price")
+    assert order["status"] == "rejected"
+    assert "NVDA" not in trader.positions
+
+
+def test_buy_rejects_insufficient_cash(trader):
+    order = trader.buy("NVDA", quantity=200, price=800.0, strategy="breakout", reason="too big")
+    assert order["status"] == "rejected"
+    assert "NVDA" not in trader.positions
+    assert trader.cash == trader.initial_cash

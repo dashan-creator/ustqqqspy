@@ -7,6 +7,8 @@ from app.config import settings
 from app.market.data_service import market_data_service
 from app.strategy import STRATEGIES
 from app.llm import review_risk
+from app.models.llm_report import LLMReport
+from app.models.db import async_session
 from app.risk import CircuitBreaker, HardRiskChecker, PositionManager
 from app.execution.paper_trader import PaperTrader
 from app.execution.order_manager import OrderManager
@@ -161,3 +163,23 @@ class ScannerPipeline:
 
 
 scanner_pipeline = ScannerPipeline()
+    async def _persist_llm_report(self, symbol_id: int | None, report_type: str, source_text: str, llm_result: dict) -> None:
+        try:
+            async with async_session() as session:
+                report = LLMReport(
+                    symbol_id=symbol_id,
+                    report_type=report_type,
+                    source_text=source_text,
+                    summary=llm_result.get('reason'),
+                    sentiment=llm_result.get('sentiment'),
+                    impact_score=llm_result.get('impact_score'),
+                    risk_score=llm_result.get('risk_score'),
+                    risk_flags=llm_result.get('risk_flags'),
+                    suggested_action=llm_result.get('action'),
+                    model_used=llm_result.get('_model'),
+                    latency_ms=llm_result.get('_latency_ms'),
+                )
+                session.add(report)
+                await session.commit()
+        except Exception:
+            logger.exception('Failed to persist LLM report')

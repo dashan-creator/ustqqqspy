@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     max_single_position_pct: float = 2.0
     consecutive_loss_limit: int = 3
     # App
+    admin_api_key: str = ""
     debug: bool = False
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}

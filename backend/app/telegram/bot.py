@@ -13,6 +13,10 @@ logger = logging.getLogger(__name__)
 _pipeline = None
 
 
+def _authorized(update: Update) -> bool:
+    return bool(settings.telegram_chat_id) and str(update.effective_chat.id) == str(settings.telegram_chat_id)
+
+
 def set_pipeline(pipeline):
     global _pipeline
     _pipeline = pipeline
@@ -35,6 +39,9 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_pnl(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _authorized(update):
+        await update.message.reply_text('Forbidden')
+        return
     if not _pipeline:
         return
     stats = _pipeline.trader.get_stats()
@@ -49,6 +56,9 @@ async def cmd_pnl(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_positions(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _authorized(update):
+        await update.message.reply_text('Forbidden')
+        return
     if not _pipeline:
         return
     positions = _pipeline.trader.positions
@@ -62,6 +72,9 @@ async def cmd_positions(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_pause(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _authorized(update):
+        await update.message.reply_text('Forbidden')
+        return
     if not _pipeline:
         return
     _pipeline.circuit_breaker.pause("Manual pause via Telegram")
@@ -69,6 +82,9 @@ async def cmd_pause(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_resume(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _authorized(update):
+        await update.message.reply_text('Forbidden')
+        return
     if not _pipeline:
         return
     _pipeline.circuit_breaker.resume()
@@ -76,6 +92,9 @@ async def cmd_resume(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_risk(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _authorized(update):
+        await update.message.reply_text('Forbidden')
+        return
     if not _pipeline:
         return
     s = _pipeline.get_status()
@@ -89,6 +108,9 @@ async def cmd_risk(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_signals(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not _authorized(update):
+        await update.message.reply_text('Forbidden')
+        return
     if not _pipeline:
         return
     results = _pipeline.last_scan_results
