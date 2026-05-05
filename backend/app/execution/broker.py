@@ -46,7 +46,7 @@ class IBKRBroker:
         return 0.0
 
     async def get_positions(self) -> list[dict]:
-        positions = await self.ib.positionsAsync()
+        positions = await self.ib.reqPositionsAsync()
         result = []
         for pos in positions:
             result.append({
