@@ -142,7 +142,7 @@ class ScannerPipeline:
 
             # Execute via IBKR if available, otherwise paper trader
             if self.ibkr_broker and self.ibkr_broker.is_connected:
-                order = self.ibkr_broker.place_market_order(ticker, quantity, "buy")
+                order = await self.ibkr_broker.place_market_order(ticker, quantity, "buy")
                 order["strategy"] = signal["strategy_name"]
             else:
                 order = self.order_manager.execute_signal(signal, quantity)
@@ -170,7 +170,7 @@ class ScannerPipeline:
         if self.ibkr_broker:
             if self.ibkr_broker.is_connected:
                 ibkr_status = "connected"
-                ibkr_account = self.ibkr_broker.get_account_summary()
+                ibkr_account = await self.ibkr_broker.get_account_summary()
             else:
                 ibkr_status = "disconnected"
 

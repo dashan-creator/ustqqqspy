@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
-from ib_insync import IB, Stock, MarketOrder, LimitOrder, Trade as IBTrade
+from ib_insync import IB, Stock, MarketOrder, LimitOrder
 
 logger = logging.getLogger(__name__)
 
@@ -38,15 +38,15 @@ class IBKRBroker:
     def is_connected(self) -> bool:
         return self._connected and self.ib.isConnected()
 
-    def get_account_value(self) -> float:
-        account = self.ib.accountSummary()
+    async def get_account_value(self) -> float:
+        account = await self.ib.accountSummaryAsync()
         for item in account:
             if item.tag == "NetLiquidation":
                 return float(item.value)
         return 0.0
 
-    def get_positions(self) -> list[dict]:
-        positions = self.ib.positions()
+    async def get_positions(self) -> list[dict]:
+        positions = await self.ib.positionsAsync()
         result = []
         for pos in positions:
             result.append({
@@ -57,7 +57,7 @@ class IBKRBroker:
             })
         return result
 
-    def get_open_orders(self) -> list[dict]:
+    async def get_open_orders(self) -> list[dict]:
         trades = self.ib.openTrades()
         result = []
         for t in trades:
@@ -72,9 +72,9 @@ class IBKRBroker:
             })
         return result
 
-    def place_market_order(self, ticker: str, quantity: int, side: str) -> dict:
+    async def place_market_order(self, ticker: str, quantity: int, side: str) -> dict:
         contract = Stock(ticker, "SMART", "USD")
-        self.ib.qualifyContracts(contract)
+        await self.ib.qualifyContractsAsync(contract)
         order = MarketOrder(side.upper(), quantity)
         trade = self.ib.placeOrder(contract, order)
         logger.info("IBKR %s %s x%d", side.upper(), ticker, quantity)
@@ -85,9 +85,9 @@ class IBKRBroker:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-    def place_limit_order(self, ticker: str, quantity: int, side: str, price: float) -> dict:
+    async def place_limit_order(self, ticker: str, quantity: int, side: str, price: float) -> dict:
         contract = Stock(ticker, "SMART", "USD")
-        self.ib.qualifyContracts(contract)
+        await self.ib.qualifyContractsAsync(contract)
         order = LimitOrder(side.upper(), quantity, price)
         trade = self.ib.placeOrder(contract, order)
         logger.info("IBKR %s %s x%d @ %.2f", side.upper(), ticker, quantity, price)
@@ -99,7 +99,7 @@ class IBKRBroker:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-    def cancel_order(self, order_id: int):
+    async def cancel_order(self, order_id: int):
         for trade in self.ib.openTrades():
             if trade.order.orderId == order_id:
                 self.ib.cancelOrder(trade.order)
@@ -107,14 +107,14 @@ class IBKRBroker:
                 return
         logger.warning("Order %d not found", order_id)
 
-    def get_realtime_price(self, ticker: str) -> float:
+    async def get_realtime_price(self, ticker: str) -> float:
         contract = Stock(ticker, "SMART", "USD")
-        self.ib.qualifyContracts(contract)
-        [ticker_data] = self.ib.reqTickers(contract)
+        await self.ib.qualifyContractsAsync(contract)
+        [ticker_data] = await self.ib.reqTickersAsync(contract)
         return ticker_data.marketPrice()
 
-    def get_account_summary(self) -> dict:
-        account = self.ib.accountSummary()
+    async def get_account_summary(self) -> dict:
+        account = await self.ib.accountSummaryAsync()
         summary = {}
         for item in account:
             if item.tag in ("NetLiquidation", "TotalCashValue", "UnrealizedPnL", "RealizedPnL", "BuyingPower"):
