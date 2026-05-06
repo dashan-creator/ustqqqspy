@@ -33,6 +33,14 @@ async def lifespan(app: FastAPI):
 
     set_pipeline(scanner_pipeline)
 
+    # Initialize position monitor
+    from app.pipeline.position_monitor import init_position_monitor
+    init_position_monitor(
+        trader=scanner_pipeline.trader,
+        order_manager=scanner_pipeline.order_manager,
+        ibkr_broker=scanner_pipeline.ibkr_broker,
+    )
+
     scheduler = create_scheduler()
     scheduler.start()
 

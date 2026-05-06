@@ -7,6 +7,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.config import settings
 from app.pipeline.scanner import scanner_pipeline
+from app.pipeline.position_monitor import position_monitor
 from app.telegram.bot import send_message
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,18 @@ async def scan_job():
 
     logger.info("Running scan...")
     events = await scanner_pipeline.run_scan()
+
+    # Check open positions for stop-loss / take-profit
+    if position_monitor:
+        close_events = await position_monitor.check_positions()
+        for event in close_events:
+            msg = (
+                f"CLOSED: {event['ticker']} @ ${event['exit_price']:.2f}\n"
+                f"Reason: {event['reason']}\n"
+                f"PnL: ${event['pnl']:.2f} ({event['pnl_pct']:.2f}%)"
+            )
+            await send_message(msg)
+        events.extend(close_events)
 
     for event in events:
         if event.get("type") == "signal_executed":

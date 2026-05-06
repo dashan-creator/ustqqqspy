@@ -172,6 +172,12 @@ class ScannerPipeline:
             # Persist order to DB
             await persist_order(order)
 
+            # Store stop_loss/take_profit in position for PositionMonitor
+            if ticker in self.trader.positions:
+                self.trader.positions[ticker]["stop_loss"] = signal["stop_loss"]
+                self.trader.positions[ticker]["take_profit"] = signal["take_profit"]
+                self.trader.positions[ticker]["entry_reason"] = signal.get("reason", "")
+
             return {
                 "type": "signal_executed", "ticker": ticker,
                 "broker": "ibkr" if (self.ibkr_broker and self.ibkr_broker.is_connected) else "paper",
