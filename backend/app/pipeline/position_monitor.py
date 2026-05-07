@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from app.execution.paper_trader import PaperTrader
 from app.execution.order_manager import OrderManager
 from app.execution.persistence import persist_trade
+from app.journal.trade_journal import write_trade_note
 from app.llm import review_trade
 from app.market.data_service import market_data_service
 
@@ -118,6 +119,9 @@ class PositionMonitor:
             )
         except Exception:
             logger.warning("LLM trade review failed for %s", ticker)
+
+        # Write Obsidian trade note
+        await write_trade_note(trade_record, llm_review)
 
         # Update stats
         if pnl < 0:
