@@ -1,17 +1,37 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
+
+from app.execution.state_store import save_state
+
+logger = logging.getLogger(__name__)
 
 
 class PaperTrader:
     """Simulated trading engine for V0/V1."""
 
-    def __init__(self, initial_cash: float = 100_000.0):
-        self.cash = initial_cash
+    def __init__(self, initial_cash: float = 100_000.0, restore: bool = True):
         self.initial_cash = initial_cash
         self.positions: dict[str, dict] = {}
         self.trades: list[dict] = []
         self.orders: list[dict] = []
+        self.cash = initial_cash
+        if restore:
+            self._load_state()
+
+    def _load_state(self):
+        """Restore state from disk on startup."""
+        from app.execution.state_store import load_state
+        state = load_state()
+        if state and state.get("positions"):
+            self.cash = state.get("cash", self.initial_cash)
+            self.positions = state.get("positions", {})
+            logger.info("Restored state: cash=%.2f, positions=%d", self.cash, len(self.positions))
+
+    def _save(self):
+        """Persist state to disk after every trade."""
+        save_state(self.cash, self.positions, self.trades)
 
     def buy(self, ticker: str, quantity: int, price: float, strategy: str, reason: str) -> dict:
         if quantity <= 0 or price <= 0:
@@ -37,6 +57,7 @@ class PaperTrader:
             "reason": reason, "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         self.orders.append(order)
+        self._save()
         return order
 
     def sell(self, ticker: str, quantity: int, price: float, reason: str) -> dict:
@@ -70,6 +91,7 @@ class PaperTrader:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         self.orders.append(order)
+        self._save()
         return order
 
     def get_unrealized_pnl(self, ticker: str, current_price: float) -> float:

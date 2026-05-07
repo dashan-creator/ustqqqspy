@@ -33,6 +33,12 @@ async def lifespan(app: FastAPI):
 
     set_pipeline(scanner_pipeline)
 
+    # Sync state with DB on startup
+    from app.execution.state_store import sync_with_db
+    actions = await sync_with_db(scanner_pipeline.trader)
+    for a in actions:
+        logging.info("State sync: %s", a)
+
     # Initialize market data providers
     from app.market.data_service import market_data_service
     from app.market.providers import YFinanceProvider

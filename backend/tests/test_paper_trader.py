@@ -7,7 +7,7 @@ from app.execution.paper_trader import PaperTrader
 
 @pytest.fixture
 def trader():
-    return PaperTrader(initial_cash=100_000)
+    return PaperTrader(initial_cash=100_000, restore=False)
 
 
 def test_buy_order(trader):

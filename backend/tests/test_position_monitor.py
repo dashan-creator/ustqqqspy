@@ -11,7 +11,7 @@ from app.pipeline.position_monitor import PositionMonitor
 
 @pytest.fixture
 def setup():
-    trader = PaperTrader(initial_cash=100_000)
+    trader = PaperTrader(initial_cash=100_000, restore=False)
     om = OrderManager(trader)
     # Open a position with stop_loss and take_profit
     trader.buy("NVDA", 10, 100.0, "breakout", "test entry")
