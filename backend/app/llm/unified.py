@@ -108,3 +108,73 @@ async def post_trade_review(
 - 持仓时长: {hold_duration}"""
 
     return await chat(POST_TRADE_PROMPT, user_prompt, timeout=30.0)
+
+
+# === 持仓分析：定期审视所有持仓 ===
+
+POSITION_REVIEW_PROMPT = """你是一个美股持仓分析师。分析当前所有持仓，结合大盘和个股情况给出操作建议。
+
+要求：
+1. 逐个分析每只持仓的状态
+2. 结合大盘趋势判断风险
+3. 给出明确操作建议
+
+输出格式（中文，简洁直接）：
+
+📊 持仓分析报告
+
+【大盘】
+- 趋势判断和风险提示
+
+【逐个持仓】
+每个持仓格式：
+{股票} | {策略} | 盈亏 {百分比}
+→ 建议：持有/减仓/止盈/止损
+→ 原因：一句话
+
+【总评】
+- 整体风险等级：低/中/高
+- 建议操作：持有/减仓/暂停新仓
+
+保持简洁，每只股票不超过2行。"""
+
+
+async def position_review(
+    positions: list[dict],
+    market_state: str,
+    account_state: str,
+    news_summary: str = "",
+) -> str:
+    """分析所有持仓，返回中文报告（直接发 Telegram）。"""
+    if not positions:
+        return "📊 当前无持仓"
+
+    pos_text = ""
+    for p in positions:
+        pnl_pct = p.get("pnl_pct", 0)
+        pos_text += (
+            f"\n{p['ticker']} | {p['strategy']} | "
+            f"数量: {p['quantity']} | 入场: ${p['avg_price']:.2f} | "
+            f"当前: ${p.get('current_price', p['avg_price']):.2f} | "
+            f"盈亏: {pnl_pct:+.1f}% | "
+            f"止损: ${p.get('stop_loss', 0):.2f} | 止盈: ${p.get('take_profit', 0):.2f}"
+        )
+
+    user_prompt = f"""当前持仓:
+{pos_text}
+
+大盘:
+{market_state}
+
+账户:
+{account_state}
+
+新闻:
+{news_summary if news_summary else "无重大新闻"}"""
+
+    result = await chat(POSITION_REVIEW_PROMPT, user_prompt, timeout=30.0)
+
+    # 如果 LLM 返回 JSON，提取内容；否则直接返回
+    if isinstance(result, dict):
+        return result.get("content", result.get("reason", str(result)))
+    return str(result)
