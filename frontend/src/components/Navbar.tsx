@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/", label: "总览" },
   { href: "/watchlist", label: "股票池" },
-  { href: "/trades", label: "交易日志" },
+  { href: "/positions", label: "持仓" },
+  { href: "/trades", label: "交易" },
   { href: "/strategy", label: "策略" },
   { href: "/risk", label: "风控" },
 ];
@@ -13,13 +14,14 @@ const links = [
 export function Navbar() {
   const pathname = usePathname();
   return (
-    <nav className="bg-gray-900 text-white p-4 flex gap-6">
-      <span className="font-bold text-lg">USStock 量化交易</span>
+    <nav style={{ backgroundColor: "var(--bg-secondary)", borderBottom: "1px solid var(--border)" }} className="px-6 py-3 flex items-center gap-6">
+      <span className="font-bold text-lg" style={{ color: "var(--accent)" }}>USStock</span>
       {links.map((l) => (
         <Link
           key={l.href}
           href={l.href}
-          className={`hover:text-blue-400 ${pathname === l.href ? "text-blue-400 font-semibold" : ""}`}
+          className="text-sm font-medium transition-colors hover:opacity-80"
+          style={{ color: pathname === l.href ? "var(--accent)" : "var(--text-secondary)" }}
         >
           {l.label}
         </Link>
