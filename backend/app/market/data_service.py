@@ -77,10 +77,15 @@ class MarketDataService:
         volumes = df["volume"].values.astype(float)
 
         period = min(14, len(closes) - 1)
+        avg_vol = np.mean(volumes[-period:]) if len(volumes) >= period else np.mean(volumes)
+        current_vol = float(volumes[-1]) if len(volumes) > 0 else 0
+        vol_ratio = current_vol / avg_vol if avg_vol > 0 else 1.0
+
         return {
             "rsi": rsi(closes, period=period),
             "vwap": vwap(highs, lows, closes, volumes),
             "atr": atr(highs, lows, closes, period=period),
+            "volume_ratio": round(vol_ratio, 2),
         }
 
     async def get_market_context(self, benchmark: str = "QQQ") -> dict:

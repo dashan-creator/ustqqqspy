@@ -93,11 +93,16 @@ class ScannerPipeline:
             if signal is None:
                 continue
 
+            # Block if already holding this ticker
+            if ticker in self.trader.positions:
+                logger.info("SKIP %s: already holding %d shares", ticker, self.trader.positions[ticker]["quantity"])
+                return None
+
             risk_result = self.risk_checker.check(
                 position_pct=settings.max_single_position_pct,
                 current_positions=len(self.trader.positions),
-                daily_pnl_pct=self.daily_pnl / self.trader.initial_cash,
-                weekly_pnl_pct=self.weekly_pnl / self.trader.initial_cash,
+                daily_pnl_pct=self.daily_pnl / self.trader.initial_cash if self.trader.initial_cash > 0 else 0,
+                weekly_pnl_pct=self.weekly_pnl / self.trader.initial_cash if self.trader.initial_cash > 0 else 0,
                 consecutive_losses=self.consecutive_losses,
                 daily_volume_usd=bars["volume"].iloc[-1] * bars["close"].iloc[-1],
             )
@@ -189,11 +194,12 @@ class ScannerPipeline:
             # Persist order to DB
             await persist_order(order)
 
-            # Store stop_loss/take_profit in position for PositionMonitor
+            # Store stop_loss/take_profit/atr in position for PositionMonitor
             if ticker in self.trader.positions:
                 self.trader.positions[ticker]["stop_loss"] = signal["stop_loss"]
                 self.trader.positions[ticker]["take_profit"] = signal["take_profit"]
                 self.trader.positions[ticker]["entry_reason"] = signal.get("reason", "")
+                self.trader.positions[ticker]["atr"] = indicators.get("atr", signal["entry_price"] * 0.02)
 
             return {
                 "type": "signal_executed", "ticker": ticker,

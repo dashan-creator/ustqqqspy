@@ -29,9 +29,9 @@ class PaperTrader:
             self.positions = state.get("positions", {})
             logger.info("Restored state: cash=%.2f, positions=%d", self.cash, len(self.positions))
 
-    def _save(self):
+    def _save(self, highest_prices: dict | None = None):
         """Persist state to disk after every trade."""
-        save_state(self.cash, self.positions, self.trades)
+        save_state(self.cash, self.positions, self.trades, highest_prices)
 
     def buy(self, ticker: str, quantity: int, price: float, strategy: str, reason: str) -> dict:
         if quantity <= 0 or price <= 0:

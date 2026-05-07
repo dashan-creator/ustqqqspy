@@ -21,6 +21,12 @@ class PositionMonitor:
         self.order_manager = order_manager
         self.ibkr_broker = ibkr_broker
         self.highest_prices: dict[str, float] = {}
+        # Restore highest_prices from saved state
+        from app.execution.state_store import load_state
+        state = load_state()
+        if state and state.get("highest_prices"):
+            self.highest_prices = {k: float(v) for k, v in state["highest_prices"].items()}
+            logger.info("Restored highest_prices: %s", self.highest_prices)
 
     async def check_positions(self) -> list[dict]:
         """Check all open positions. Execute stop-loss/take-profit. Return close events."""
@@ -56,6 +62,10 @@ class PositionMonitor:
             if highest > 0 and current_price <= trailing_stop:
                 event = await self._close_position(ticker, current_price, f"移动止盈触发 (最高${highest:.2f}, 回落至${current_price:.2f})")
                 events.append(event)
+
+        # Save state with updated highest_prices
+        if self.highest_prices:
+            self.trader._save(self.highest_prices)
 
         return events
 

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 STATE_FILE = Path(__file__).parent.parent.parent / "data" / "trader_state.json"
 
 
-def save_state(cash: float, positions: dict, trades: list) -> None:
+def save_state(cash: float, positions: dict, trades: list, highest_prices: dict | None = None) -> None:
     """Save trader state to disk (survives restarts)."""
     try:
         STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -18,6 +18,7 @@ def save_state(cash: float, positions: dict, trades: list) -> None:
             "cash": cash,
             "positions": positions,
             "trades_count": len(trades),
+            "highest_prices": highest_prices or {},
             "saved_at": datetime.now(timezone.utc).isoformat(),
         }
         STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False))
