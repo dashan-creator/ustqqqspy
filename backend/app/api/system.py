@@ -36,3 +36,19 @@ async def resume_trading(_admin: None = Depends(require_admin)):
 async def system_stats(_admin: None = Depends(require_admin)):
     pipeline = get_pipeline()
     return pipeline.trader.get_stats()
+
+
+@router.get("/positions")
+async def list_positions(_admin: None = Depends(require_admin)):
+    pipeline = get_pipeline()
+    positions = []
+    for ticker, pos in pipeline.trader.positions.items():
+        positions.append({
+            "ticker": ticker,
+            "quantity": pos.get("quantity", 0),
+            "avg_price": pos.get("avg_price", 0),
+            "strategy": pos.get("strategy", ""),
+            "stop_loss": pos.get("stop_loss", 0),
+            "take_profit": pos.get("take_profit", 0),
+        })
+    return positions
