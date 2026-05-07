@@ -44,10 +44,19 @@ class ScannerPipeline:
             news_adapters.append(PolygonAdapter(api_key=settings.polygon_api_key))
         self.news_service = NewsService(adapters=news_adapters, cache_ttl=settings.news_cache_ttl_seconds)
         self.ibkr_broker = None  # Set by main.py if IBKR mode enabled
-        self.daily_pnl = 0.0
-        self.weekly_pnl = 0.0
-        self.consecutive_losses = 0
         self.last_scan_results: list[dict] = []
+
+    @property
+    def daily_pnl(self) -> float:
+        return getattr(self.trader, "daily_pnl", 0.0)
+
+    @property
+    def weekly_pnl(self) -> float:
+        return getattr(self.trader, "weekly_pnl", 0.0)
+
+    @property
+    def consecutive_losses(self) -> int:
+        return getattr(self.trader, "consecutive_losses", 0)
 
     async def run_scan(self) -> list[dict]:
         events = []
@@ -175,8 +184,16 @@ class ScannerPipeline:
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
 
+            # Apply LLM suggested position size if available
+            effective_pct = settings.max_single_position_pct
+            if llm_action == "reduce_size":
+                suggested = llm_result.get("suggested_position_pct")
+                if suggested and suggested < effective_pct:
+                    effective_pct = suggested
+                    logger.info("Reducing position to %.1f%% per LLM", effective_pct)
+
             quantity = self.position_manager.calculate_quantity(
-                signal["entry_price"], settings.max_single_position_pct,
+                signal["entry_price"], effective_pct,
             )
             if quantity <= 0:
                 continue
@@ -188,20 +205,23 @@ class ScannerPipeline:
             if self.ibkr_broker and self.ibkr_broker.is_connected:
                 order = await self.ibkr_broker.place_market_order(ticker, quantity, "buy")
                 order["strategy"] = signal["strategy_name"]
-                # Sync local position tracking for PositionMonitor
-                if order.get("status") != "rejected":
+                # Only sync local position when actually filled
+                if order.get("status") == "filled":
                     price = order.get("filled_price", signal["entry_price"])
-                    if ticker in self.trader.positions:
-                        pos = self.trader.positions[ticker]
-                        total_qty = pos["quantity"] + quantity
-                        pos["avg_price"] = (pos["avg_price"] * pos["quantity"] + price * quantity) / total_qty
-                        pos["quantity"] = total_qty
-                    else:
-                        self.trader.positions[ticker] = {
-                            "quantity": quantity, "avg_price": price,
-                            "strategy": signal["strategy_name"],
-                        }
-                    self.trader.cash -= quantity * price
+                    if price > 0:
+                        if ticker in self.trader.positions:
+                            pos = self.trader.positions[ticker]
+                            total_qty = pos["quantity"] + quantity
+                            pos["avg_price"] = (pos["avg_price"] * pos["quantity"] + price * quantity) / total_qty
+                            pos["quantity"] = total_qty
+                        else:
+                            self.trader.positions[ticker] = {
+                                "quantity": quantity, "avg_price": price,
+                                "strategy": signal["strategy_name"],
+                            }
+                        self.trader.cash -= quantity * price
+                else:
+                    logger.warning("IBKR order not filled: %s status=%s", ticker, order.get("status"))
             else:
                 order = self.order_manager.execute_signal(signal, quantity)
 

@@ -17,7 +17,7 @@ def save_state(cash: float, positions: dict, trades: list, highest_prices: dict 
         state = {
             "cash": cash,
             "positions": positions,
-            "trades_count": len(trades),
+            "trades": trades,
             "highest_prices": highest_prices or {},
             "saved_at": datetime.now(timezone.utc).isoformat(),
         }

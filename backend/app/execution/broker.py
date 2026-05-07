@@ -82,9 +82,34 @@ class IBKRBroker:
         order = MarketOrder(side.upper(), quantity)
         trade = await asyncio.to_thread(self.ib.placeOrder, contract, order)
         logger.info("IBKR %s %s x%d", side.upper(), ticker, quantity)
+
+        # Wait for fill (up to 15s)
+        for _ in range(30):
+            await asyncio.sleep(0.5)
+            status = trade.orderStatus.status
+            if status == "Filled":
+                filled_price = trade.orderStatus.avgFillPrice
+                logger.info("IBKR FILLED %s %s x%d @ %.2f", side.upper(), ticker, quantity, filled_price)
+                return {
+                    "ticker": ticker, "side": side, "quantity": quantity,
+                    "order_type": "market", "status": "filled",
+                    "filled_price": float(filled_price) if filled_price else 0,
+                    "order_id": trade.order.orderId,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+            if status in ("Cancelled", "Inactive"):
+                return {
+                    "ticker": ticker, "side": side, "quantity": quantity,
+                    "order_type": "market", "status": "rejected",
+                    "reason": f"IBKR status: {status}",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+
+        # Timeout - return submitted status (not treated as filled)
         return {
             "ticker": ticker, "side": side, "quantity": quantity,
             "order_type": "market", "status": trade.orderStatus.status,
+            "filled_price": 0,
             "order_id": trade.order.orderId,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }

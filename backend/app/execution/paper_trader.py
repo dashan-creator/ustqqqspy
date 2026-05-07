@@ -17,6 +17,9 @@ class PaperTrader:
         self.trades: list[dict] = []
         self.orders: list[dict] = []
         self.cash = initial_cash
+        self.consecutive_losses = 0
+        self.daily_pnl = 0.0
+        self.weekly_pnl = 0.0
         if restore:
             self._load_state()
 
@@ -27,7 +30,9 @@ class PaperTrader:
         if state:
             self.cash = state.get("cash", self.initial_cash)
             self.positions = state.get("positions", {})
-            logger.info("Restored state: cash=%.2f, positions=%d", self.cash, len(self.positions))
+            self.trades = state.get("trades", [])
+            logger.info("Restored state: cash=%.2f, positions=%d, trades=%d",
+                        self.cash, len(self.positions), len(self.trades))
 
     def _save(self, highest_prices: dict | None = None):
         """Persist state to disk after every trade."""
