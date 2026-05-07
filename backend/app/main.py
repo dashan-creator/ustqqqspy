@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
     from app.config import settings
     from app.pipeline.scanner import scanner_pipeline
     from app.scheduler.market_scanner import create_scheduler
-    from app.telegram.bot import create_bot, set_pipeline
+    from app.telegram.bot import set_pipeline, start_telegram
 
     # IBKR connection (optional)
     if settings.use_ibkr:
@@ -53,26 +53,9 @@ async def lifespan(app: FastAPI):
     scheduler = create_scheduler()
     scheduler.start()
 
-    tg_app = None
-    try:
-        tg_app = create_bot()
-        if tg_app:
-            import asyncio
-            await asyncio.wait_for(tg_app.initialize(), timeout=10.0)
-            await asyncio.wait_for(tg_app.start(), timeout=10.0)
-            await tg_app.updater.start_polling()
-    except Exception as e:
-        logging.warning("Telegram bot failed to start: %s", e)
-        tg_app = None
+    await start_telegram()
 
     yield
-
-    try:
-        if tg_app:
-            await tg_app.updater.stop()
-            await tg_app.stop()
-    except Exception:
-        pass
     if scanner_pipeline.ibkr_broker:
         scanner_pipeline.ibkr_broker.disconnect()
     scheduler.shutdown()
