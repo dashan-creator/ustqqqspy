@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"git push -u origin master 2>&1\",\"description\":\"Push to GitHub\"}",
-  "error": "Exit code 128\nfatal: unable to access 'https://github.com/dashan-creator/usstock.git/': gnutls_handshake() failed: The TLS connection was non-properly terminated.",
-  "timestamp": "2026-05-04T08:57:43.760Z",
-  "retry_count": 1
-}

@@ -7,14 +7,33 @@ from app.models.db import async_session
 from app.models.trade import Trade
 from app.models.signal import Signal
 from app.models.order import Order
+from app.models.symbol import Symbol
+from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
+
+
+async def _get_or_create_symbol(ticker: str) -> int:
+    """Get symbol_id by ticker, create if not exists."""
+    async with async_session() as session:
+        result = await session.execute(select(Symbol).where(Symbol.ticker == ticker))
+        symbol = result.scalar_one_or_none()
+        if symbol:
+            return symbol.id
+        symbol = Symbol(ticker=ticker, name=ticker, is_active=True)
+        session.add(symbol)
+        await session.commit()
+        await session.refresh(symbol)
+        return symbol.id
 
 
 async def persist_order(order: dict, symbol_id: int | None = None) -> None:
     """Persist a filled order to the database."""
     if order.get("status") != "filled":
         return
+    ticker = order.get("ticker", "")
+    if not symbol_id and ticker:
+        symbol_id = await _get_or_create_symbol(ticker)
     try:
         async with async_session() as session:
             db_order = Order(
@@ -34,6 +53,9 @@ async def persist_order(order: dict, symbol_id: int | None = None) -> None:
 
 async def persist_trade(trade: dict, symbol_id: int | None = None) -> None:
     """Persist a completed trade to the database."""
+    ticker = trade.get("ticker", "")
+    if not symbol_id and ticker:
+        symbol_id = await _get_or_create_symbol(ticker)
     try:
         async with async_session() as session:
             db_trade = Trade(
@@ -58,6 +80,9 @@ async def persist_trade(trade: dict, symbol_id: int | None = None) -> None:
 
 async def persist_signal(signal: dict, symbol_id: int | None = None) -> int | None:
     """Persist a trading signal to the database. Returns signal ID."""
+    ticker = signal.get("ticker", "")
+    if not symbol_id and ticker:
+        symbol_id = await _get_or_create_symbol(ticker)
     try:
         async with async_session() as session:
             db_signal = Signal(

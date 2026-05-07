@@ -188,6 +188,20 @@ class ScannerPipeline:
             if self.ibkr_broker and self.ibkr_broker.is_connected:
                 order = await self.ibkr_broker.place_market_order(ticker, quantity, "buy")
                 order["strategy"] = signal["strategy_name"]
+                # Sync local position tracking for PositionMonitor
+                if order.get("status") != "rejected":
+                    price = order.get("filled_price", signal["entry_price"])
+                    if ticker in self.trader.positions:
+                        pos = self.trader.positions[ticker]
+                        total_qty = pos["quantity"] + quantity
+                        pos["avg_price"] = (pos["avg_price"] * pos["quantity"] + price * quantity) / total_qty
+                        pos["quantity"] = total_qty
+                    else:
+                        self.trader.positions[ticker] = {
+                            "quantity": quantity, "avg_price": price,
+                            "strategy": signal["strategy_name"],
+                        }
+                    self.trader.cash -= quantity * price
             else:
                 order = self.order_manager.execute_signal(signal, quantity)
 

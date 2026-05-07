@@ -24,7 +24,7 @@ class PaperTrader:
         """Restore state from disk on startup."""
         from app.execution.state_store import load_state
         state = load_state()
-        if state and state.get("positions"):
+        if state:
             self.cash = state.get("cash", self.initial_cash)
             self.positions = state.get("positions", {})
             logger.info("Restored state: cash=%.2f, positions=%d", self.cash, len(self.positions))

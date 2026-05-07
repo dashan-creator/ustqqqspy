@@ -11,14 +11,15 @@ from app.pipeline.position_monitor import PositionMonitor
 
 @pytest.fixture
 def setup():
-    trader = PaperTrader(initial_cash=100_000, restore=False)
-    om = OrderManager(trader)
-    # Open a position with stop_loss and take_profit
-    trader.buy("NVDA", 10, 100.0, "breakout", "test entry")
-    trader.positions["NVDA"]["stop_loss"] = 95.0
-    trader.positions["NVDA"]["take_profit"] = 120.0
-    trader.positions["NVDA"]["entry_reason"] = "test"
-    monitor = PositionMonitor(trader, om)
+    # Mock load_state to avoid DB/file access during init
+    with patch("app.execution.state_store.load_state", return_value=None):
+        trader = PaperTrader(initial_cash=100_000, restore=False)
+        om = OrderManager(trader)
+        trader.buy("NVDA", 10, 100.0, "breakout", "test entry")
+        trader.positions["NVDA"]["stop_loss"] = 95.0
+        trader.positions["NVDA"]["take_profit"] = 120.0
+        trader.positions["NVDA"]["entry_reason"] = "test"
+        monitor = PositionMonitor(trader, om)
     return trader, om, monitor
 
 
@@ -34,7 +35,10 @@ async def test_no_close_when_price_in_range(setup):
 @pytest.mark.asyncio
 async def test_stop_loss_triggers(setup):
     trader, om, monitor = setup
-    with patch.object(monitor, "_get_current_price", return_value=94.0):
+    with patch.object(monitor, "_get_current_price", return_value=94.0), \
+         patch("app.pipeline.position_monitor.persist_trade", new_callable=AsyncMock), \
+         patch("app.pipeline.position_monitor.post_trade_review", new_callable=AsyncMock, return_value={}), \
+         patch("app.pipeline.position_monitor.write_trade_note", new_callable=AsyncMock):
         events = await monitor.check_positions()
     assert len(events) == 1
     assert events[0]["type"] == "position_closed"
@@ -46,7 +50,10 @@ async def test_stop_loss_triggers(setup):
 @pytest.mark.asyncio
 async def test_take_profit_triggers(setup):
     trader, om, monitor = setup
-    with patch.object(monitor, "_get_current_price", return_value=125.0):
+    with patch.object(monitor, "_get_current_price", return_value=125.0), \
+         patch("app.pipeline.position_monitor.persist_trade", new_callable=AsyncMock), \
+         patch("app.pipeline.position_monitor.post_trade_review", new_callable=AsyncMock, return_value={}), \
+         patch("app.pipeline.position_monitor.write_trade_note", new_callable=AsyncMock):
         events = await monitor.check_positions()
     assert len(events) == 1
     assert "止盈" in events[0]["reason"]
@@ -67,8 +74,10 @@ async def test_trailing_stop(setup):
     assert monitor.highest_prices["NVDA"] == 130.0
 
     # Price drops significantly
-    # highest=130, atr=130*0.02=2.6, trailing_stop=130-1.5*2.6=126.1, price=124 < 126.1
-    with patch.object(monitor, "_get_current_price", return_value=124.0):
+    with patch.object(monitor, "_get_current_price", return_value=124.0), \
+         patch("app.pipeline.position_monitor.persist_trade", new_callable=AsyncMock), \
+         patch("app.pipeline.position_monitor.post_trade_review", new_callable=AsyncMock, return_value={}), \
+         patch("app.pipeline.position_monitor.write_trade_note", new_callable=AsyncMock):
         events = await monitor.check_positions()
     assert len(events) == 1
     assert "移动止盈" in events[0]["reason"]
@@ -77,8 +86,10 @@ async def test_trailing_stop(setup):
 @pytest.mark.asyncio
 async def test_consecutive_losses_increments(setup):
     trader, om, monitor = setup
-    # Stop loss triggers at loss
-    with patch.object(monitor, "_get_current_price", return_value=90.0):
+    with patch.object(monitor, "_get_current_price", return_value=90.0), \
+         patch("app.pipeline.position_monitor.persist_trade", new_callable=AsyncMock), \
+         patch("app.pipeline.position_monitor.post_trade_review", new_callable=AsyncMock, return_value={}), \
+         patch("app.pipeline.position_monitor.write_trade_note", new_callable=AsyncMock):
         await monitor.check_positions()
     assert trader.consecutive_losses == 1
 
@@ -87,6 +98,9 @@ async def test_consecutive_losses_increments(setup):
 async def test_consecutive_losses_resets_on_win(setup):
     trader, om, monitor = setup
     trader.consecutive_losses = 2
-    with patch.object(monitor, "_get_current_price", return_value=125.0):
+    with patch.object(monitor, "_get_current_price", return_value=125.0), \
+         patch("app.pipeline.position_monitor.persist_trade", new_callable=AsyncMock), \
+         patch("app.pipeline.position_monitor.post_trade_review", new_callable=AsyncMock, return_value={}), \
+         patch("app.pipeline.position_monitor.write_trade_note", new_callable=AsyncMock):
         await monitor.check_positions()
     assert trader.consecutive_losses == 0

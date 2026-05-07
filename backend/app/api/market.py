@@ -16,13 +16,13 @@ async def list_symbols():
 @router.get("/quote/{ticker}")
 async def get_quote(ticker: str):
     svc = get_market_service()
-    return svc.get_quote(ticker)
+    return await svc.get_quote(ticker)
 
 
 @router.get("/bars/{ticker}")
 async def get_bars(ticker: str, interval: str = "15m", period: str = "5d"):
     svc = get_market_service()
-    df = svc.get_bars(ticker, interval=interval, period=period)
+    df = await svc.get_bars(ticker, interval=interval, period=period)
     if df.empty:
         return []
     return df.reset_index().to_dict(orient="records")
