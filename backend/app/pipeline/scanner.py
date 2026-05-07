@@ -109,40 +109,62 @@ class ScannerPipeline:
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
 
-            # Fetch news for this ticker
+            # Smart Gate: decide if LLM is needed
+            from app.llm.smart_gate import smart_gate
             news_items = await self.news_service.get_ticker_news(ticker)
-            news_summary = "; ".join(n.headline for n in news_items[:5]) or "无相关新闻"
+            volume_ratio = indicators.get("volume_ratio", 1.0)
+            if volume_ratio == 0:
+                volume_ratio = 1.0
 
-            # Analyze news with LLM (best-effort)
-            if news_items:
-                try:
-                    await analyze_news(
-                        ticker=ticker,
-                        headline=news_items[0].headline,
-                        price_change=f"{market['change_pct']:+.2f}%",
-                        market_state=f"QQQ {market['change_pct']:+.2f}%",
-                    )
-                except Exception:
-                    logger.warning("News analysis failed for %s", ticker)
-
-            # Build position and account context for LLM
-            pos_lines = []
-            for t, p in self.trader.positions.items():
-                pos_lines.append(f"  {t}: {p['quantity']}股 @ ${p['avg_price']:.2f} [{p['strategy']}]")
-            current_positions = "\n".join(pos_lines) if pos_lines else "无持仓"
-            account_state = f"可用资金: ${self.trader.cash:,.2f}\n累计盈亏: ${self.trader.get_total_pnl():,.2f}\n当日盈亏: ${self.daily_pnl:,.2f}\n连续亏损: {self.consecutive_losses}笔"
-
-            llm_result = await review_risk(
-                ticker=ticker,
-                strategy=signal["strategy_name"],
-                entry_price=signal["entry_price"],
-                stop_loss=signal["stop_loss"],
-                position_pct=settings.max_single_position_pct,
-                market_state=f"QQQ {market['change_pct']:+.2f}%",
-                news_summary=news_summary,
-                current_positions=current_positions,
-                account_state=account_state,
+            gate = smart_gate.evaluate(
+                rsi=indicators.get("rsi", 50),
+                volume_ratio=volume_ratio,
+                market_change_pct=market.get("change_pct", 0),
+                signal_strength=signal.get("strength", 0.5),
+                has_news=len(news_items) > 0,
+                consecutive_losses=self.consecutive_losses,
+                bars=bars,
+                direction=signal.get("direction", "long"),
             )
+
+            llm_result = {"action": gate.auto_action, "risk_score": 1, "reason": gate.reason}
+            llm_skipped = not gate.needs_llm
+
+            if gate.needs_llm:
+                logger.info("LLM GATE [%s]: %s → calling LLM", ticker, gate.reason)
+                # Analyze news with LLM (best-effort)
+                if news_items:
+                    try:
+                        await analyze_news(
+                            ticker=ticker,
+                            headline=news_items[0].headline,
+                            price_change=f"{market['change_pct']:+.2f}%",
+                            market_state=f"QQQ {market['change_pct']:+.2f}%",
+                        )
+                    except Exception:
+                        logger.warning("News analysis failed for %s", ticker)
+
+                # Build context for LLM
+                news_summary = "; ".join(n.headline for n in news_items[:5]) or "无相关新闻"
+                pos_lines = []
+                for t, p in self.trader.positions.items():
+                    pos_lines.append(f"  {t}: {p['quantity']}股 @ ${p['avg_price']:.2f} [{p['strategy']}]")
+                current_positions = "\n".join(pos_lines) if pos_lines else "无持仓"
+                account_state = f"可用资金: ${self.trader.cash:,.2f}\n累计盈亏: ${self.trader.get_total_pnl():,.2f}\n当日盈亏: ${self.daily_pnl:,.2f}\n连续亏损: {self.consecutive_losses}笔"
+
+                llm_result = await review_risk(
+                    ticker=ticker,
+                    strategy=signal["strategy_name"],
+                    entry_price=signal["entry_price"],
+                    stop_loss=signal["stop_loss"],
+                    position_pct=settings.max_single_position_pct,
+                    market_state=f"QQQ {market['change_pct']:+.2f}%",
+                    news_summary=news_summary,
+                    current_positions=current_positions,
+                    account_state=account_state,
+                )
+            else:
+                logger.info("LLM GATE [%s]: %s → skip LLM, auto=%s", ticker, gate.reason, gate.auto_action)
 
             llm_action = llm_result.get("action", "approve")
             if llm_action == "reject":
