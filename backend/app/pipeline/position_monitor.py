@@ -25,7 +25,7 @@ class PositionMonitor:
         """Check all open positions. Execute stop-loss/take-profit. Return close events."""
         events = []
         for ticker, pos in list(self.trader.positions.items()):
-            current_price = self._get_current_price(ticker)
+            current_price = await self._get_current_price(ticker)
             if current_price <= 0:
                 continue
 
@@ -58,10 +58,10 @@ class PositionMonitor:
 
         return events
 
-    def _get_current_price(self, ticker: str) -> float:
+    async def _get_current_price(self, ticker: str) -> float:
         """Get current price from market data service."""
         try:
-            quote = market_data_service.get_quote(ticker)
+            quote = await market_data_service.get_quote(ticker)
             return quote.get("price", 0.0)
         except Exception:
             logger.warning("Failed to get price for %s", ticker)

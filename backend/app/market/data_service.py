@@ -1,52 +1,73 @@
 from __future__ import annotations
 
-import yfinance as yf
+import logging
+import time
+
 import numpy as np
 import pandas as pd
 
 from app.market.indicators import atr, rsi, vwap
+from app.market.providers.base import MarketDataProvider
+
+logger = logging.getLogger(__name__)
 
 
 class MarketDataService:
-    """Fetch market data via yfinance (V0)."""
+    """Multi-source market data service with automatic failover."""
 
-    def get_bars(self, ticker: str, interval: str = "15m", period: str = "5d") -> pd.DataFrame:
-        """Fetch OHLCV bars."""
-        stock = yf.Ticker(ticker)
-        df = stock.history(period=period, interval=interval)
-        if df.empty:
-            return pd.DataFrame()
-        df = df.rename(columns={
-            "Open": "open", "High": "high", "Low": "low",
-            "Close": "close", "Volume": "volume",
-        })
-        return df[["open", "high", "low", "close", "volume"]]
+    def __init__(self):
+        self.providers: list[MarketDataProvider] = []
+        self._cache: dict[str, tuple[float, pd.DataFrame]] = {}
+        self._quote_cache: dict[str, tuple[float, dict]] = {}
+        self._cache_ttl = 60  # seconds
 
-    def get_quote(self, ticker: str) -> dict:
-        """Get latest quote."""
-        stock = yf.Ticker(ticker)
-        info = stock.fast_info
-        try:
-            price = float(getattr(info, "last_price", 0) or 0)
-        except (TypeError, ValueError):
-            price = 0.0
-        try:
-            change_pct = float(getattr(info, "regular_market_change_percent", 0) or 0)
-        except (TypeError, ValueError):
-            change_pct = 0.0
-        try:
-            volume = int(getattr(info, "last_volume", 0) or 0)
-        except (TypeError, ValueError):
-            volume = 0
-        return {
-            "ticker": ticker,
-            "price": price,
-            "change_pct": change_pct,
-            "volume": volume,
-        }
+    def set_providers(self, providers: list[MarketDataProvider]):
+        self.providers = providers
+        logger.info("Market data providers: %s", [p.name for p in providers])
+
+    async def get_bars(self, ticker: str, interval: str = "15m", period: str = "5d") -> pd.DataFrame:
+        cache_key = f"{ticker}:{interval}:{period}"
+        cached = self._cache.get(cache_key)
+        if cached and time.monotonic() - cached[0] < self._cache_ttl:
+            return cached[1]
+
+        for provider in self.providers:
+            try:
+                df = await provider.get_bars(ticker, interval, period)
+                if not df.empty and len(df) > 1:
+                    self._cache[cache_key] = (time.monotonic(), df)
+                    return df
+            except Exception as e:
+                logger.warning("Provider %s failed for %s: %s", provider.name, ticker, e)
+
+        # Return cached data if available (even expired)
+        if cached:
+            logger.warning("All providers failed for %s, using stale cache", ticker)
+            return cached[1]
+
+        logger.error("No data available for %s from any provider", ticker)
+        return pd.DataFrame()
+
+    async def get_quote(self, ticker: str) -> dict:
+        cached = self._quote_cache.get(ticker)
+        if cached and time.monotonic() - cached[0] < self._cache_ttl:
+            return cached[1]
+
+        for provider in self.providers:
+            try:
+                quote = await provider.get_quote(ticker)
+                if quote.get("price", 0) > 0:
+                    self._quote_cache[ticker] = (time.monotonic(), quote)
+                    return quote
+            except Exception as e:
+                logger.warning("Provider %s quote failed for %s: %s", provider.name, ticker, e)
+
+        if cached:
+            return cached[1]
+
+        return {"ticker": ticker, "price": 0, "change_pct": 0, "volume": 0}
 
     def compute_indicators(self, df: pd.DataFrame) -> dict:
-        """Compute RSI, VWAP, ATR."""
         if df.empty or len(df) < 2:
             return {"rsi": 50.0, "vwap": 0.0, "atr": 0.0}
 
@@ -62,9 +83,8 @@ class MarketDataService:
             "atr": atr(highs, lows, closes, period=period),
         }
 
-    def get_market_context(self, benchmark: str = "QQQ") -> dict:
-        """Get market-level context."""
-        quote = self.get_quote(benchmark)
+    async def get_market_context(self, benchmark: str = "QQQ") -> dict:
+        quote = await self.get_quote(benchmark)
         return {
             "benchmark": benchmark,
             "price": quote["price"],

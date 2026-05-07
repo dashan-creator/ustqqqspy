@@ -57,7 +57,7 @@ class ScannerPipeline:
             events.append({"type": "skipped", "reason": reason})
             return events
 
-        market = market_data_service.get_market_context("QQQ")
+        market = await market_data_service.get_market_context("QQQ")
 
         for ticker in settings.symbol_list:
             try:
@@ -81,7 +81,7 @@ class ScannerPipeline:
         return events
 
     async def _scan_symbol(self, ticker: str, market: dict) -> dict | None:
-        bars = market_data_service.get_bars(ticker, interval="15m", period="5d")
+        bars = await market_data_service.get_bars(ticker, interval="15m", period="5d")
         if bars.empty:
             return None
 

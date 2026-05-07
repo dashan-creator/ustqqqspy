@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     ibkr_host: str = "127.0.0.1"
     ibkr_port: int = 7497
     ibkr_client_id: int = 1
+    ibkr_username: str = ""
+    ibkr_password: str = ""
     use_ibkr: bool = False  # True = IBKR Paper Trading, False = in-memory paper trader
     # News
     finnhub_api_key: str = ""

@@ -33,6 +33,15 @@ async def lifespan(app: FastAPI):
 
     set_pipeline(scanner_pipeline)
 
+    # Initialize market data providers
+    from app.market.data_service import market_data_service
+    from app.market.providers import YFinanceProvider
+    providers = [YFinanceProvider()]
+    if scanner_pipeline.ibkr_broker:
+        from app.market.providers import IBKRProvider
+        providers.insert(0, IBKRProvider(scanner_pipeline.ibkr_broker))
+    market_data_service.set_providers(providers)
+
     # Initialize position monitor
     from app.pipeline.position_monitor import init_position_monitor
     init_position_monitor(
@@ -48,8 +57,9 @@ async def lifespan(app: FastAPI):
     try:
         tg_app = create_bot()
         if tg_app:
-            await tg_app.initialize()
-            await tg_app.start()
+            import asyncio
+            await asyncio.wait_for(tg_app.initialize(), timeout=10.0)
+            await asyncio.wait_for(tg_app.start(), timeout=10.0)
             await tg_app.updater.start_polling()
     except Exception as e:
         logging.warning("Telegram bot failed to start: %s", e)
