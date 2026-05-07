@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     news_cache_ttl_seconds: int = 300
     # Trading
     symbols: str = "SPY,QQQ,AAPL,MSFT,NVDA,TSLA,META,AMZN,GOOGL,AMD"
-    scan_interval_minutes: int = 5
+    scan_interval_minutes: int = 15
     max_daily_loss_pct: float = 0.01
     max_weekly_loss_pct: float = 0.04
     max_concurrent_positions: int = 2

@@ -35,6 +35,13 @@ async def scan_job():
             await send_message(msg)
         events.extend(close_events)
 
+        # LLM 持仓分析（有持仓时）
+        stats = scanner_pipeline.trader.get_stats()
+        account_state = f"资金: ${scanner_pipeline.trader.cash:,.2f}\n总盈亏: ${stats['total_pnl']:,.2f}\n胜率: {stats['win_rate']:.0%}"
+        review = await position_monitor.review_positions(account_state=account_state)
+        if review:
+            await send_message(review)
+
     for event in events:
         if event.get("type") == "signal_executed":
             msg = (
@@ -73,58 +80,8 @@ async def daily_report_job():
     logger.info("Daily report sent")
 
 
-async def position_review_job():
-    """每30分钟让 LLM 审视所有持仓，结果推送到 Telegram。"""
-    from app.market.data_service import market_data_service
-    from app.llm.unified import position_review
-
-    positions = scanner_pipeline.trader.positions
-    if not positions:
-        return
-
-    now = datetime.now(timezone.utc)
-    if now.hour < 13 or now.hour > 20:
-        return
-
-    # 构建持仓数据
-    pos_list = []
-    news_lines = []
-    for ticker, pos in positions.items():
-        quote = await market_data_service.get_quote(ticker)
-        current_price = quote.get("price", pos["avg_price"])
-        pnl_pct = ((current_price - pos["avg_price"]) / pos["avg_price"]) * 100 if pos["avg_price"] > 0 else 0
-        pos_list.append({
-            "ticker": ticker,
-            "strategy": pos.get("strategy", ""),
-            "quantity": pos.get("quantity", 0),
-            "avg_price": pos.get("avg_price", 0),
-            "current_price": current_price,
-            "pnl_pct": round(pnl_pct, 2),
-            "stop_loss": pos.get("stop_loss", 0),
-            "take_profit": pos.get("take_profit", 0),
-        })
-
-    market = await market_data_service.get_market_context("QQQ")
-    market_state = f"QQQ {market['change_pct']:+.2f}%, {'看涨' if market['is_bullish'] else '看跌'}"
-
-    stats = scanner_pipeline.trader.get_stats()
-    account_state = f"资金: ${scanner_pipeline.trader.cash:,.2f}\n总盈亏: ${stats['total_pnl']:,.2f}\n胜率: {stats['win_rate']:.0%}"
-
-    try:
-        report = await position_review(
-            positions=pos_list,
-            market_state=market_state,
-            account_state=account_state,
-        )
-        await send_message(report)
-        logger.info("Position review sent to Telegram")
-    except Exception as e:
-        logger.warning("Position review failed: %s", e)
-
-
 def create_scheduler() -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler()
     scheduler.add_job(scan_job, "interval", minutes=settings.scan_interval_minutes, id="market_scan")
-    scheduler.add_job(position_review_job, "interval", minutes=30, id="position_review")
     scheduler.add_job(daily_report_job, "cron", hour=20, minute=5, id="daily_report")
     return scheduler

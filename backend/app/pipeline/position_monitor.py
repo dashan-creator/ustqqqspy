@@ -7,7 +7,7 @@ from app.execution.paper_trader import PaperTrader
 from app.execution.order_manager import OrderManager
 from app.execution.persistence import persist_trade
 from app.journal.trade_journal import write_trade_note
-from app.llm.unified import post_trade_review
+from app.llm.unified import post_trade_review, position_review
 from app.market.data_service import market_data_service
 
 logger = logging.getLogger(__name__)
@@ -159,6 +159,41 @@ class PositionMonitor:
             "llm_review": llm_review,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
+    async def review_positions(self, market_state: str = "", account_state: str = "") -> str | None:
+        """LLM 审视所有持仓，返回报告文本。无持仓时返回 None。"""
+        if not self.trader.positions:
+            return None
+
+        pos_list = []
+        for ticker, pos in self.trader.positions.items():
+            quote = await market_data_service.get_quote(ticker)
+            current_price = quote.get("price", pos["avg_price"])
+            pnl_pct = ((current_price - pos["avg_price"]) / pos["avg_price"]) * 100 if pos["avg_price"] > 0 else 0
+            pos_list.append({
+                "ticker": ticker,
+                "strategy": pos.get("strategy", ""),
+                "quantity": pos.get("quantity", 0),
+                "avg_price": pos.get("avg_price", 0),
+                "current_price": current_price,
+                "pnl_pct": round(pnl_pct, 2),
+                "stop_loss": pos.get("stop_loss", 0),
+                "take_profit": pos.get("take_profit", 0),
+            })
+
+        if not market_state:
+            market = await market_data_service.get_market_context("QQQ")
+            market_state = f"QQQ {market['change_pct']:+.2f}%"
+
+        try:
+            return await position_review(
+                positions=pos_list,
+                market_state=market_state,
+                account_state=account_state,
+            )
+        except Exception as e:
+            logger.warning("Position review failed: %s", e)
+            return None
 
 
 # Singleton
