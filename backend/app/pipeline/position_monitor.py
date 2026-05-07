@@ -7,7 +7,7 @@ from app.execution.paper_trader import PaperTrader
 from app.execution.order_manager import OrderManager
 from app.execution.persistence import persist_trade
 from app.journal.trade_journal import write_trade_note
-from app.llm import review_trade
+from app.llm.unified import post_trade_review
 from app.market.data_service import market_data_service
 
 logger = logging.getLogger(__name__)
@@ -108,7 +108,7 @@ class PositionMonitor:
         # LLM post-trade review
         llm_review = {}
         try:
-            llm_review = await review_trade(
+            llm_review = await post_trade_review(
                 ticker=ticker,
                 strategy=strategy,
                 entry_price=entry_price,
@@ -122,6 +122,17 @@ class PositionMonitor:
 
         # Write Obsidian trade note
         await write_trade_note(trade_record, llm_review)
+
+        # Store review for next LLM call in scanner
+        if llm_review and not llm_review.get("error"):
+            try:
+                from app.pipeline.scanner import scanner_pipeline
+                scanner_pipeline._last_trade_review = (
+                    f"{ticker} {strategy} {'盈利' if pnl > 0 else '亏损'} {pnl_pct:+.1f}%\n"
+                    f"教训: {llm_review.get('key_lesson', llm_review.get('suggestion', ''))}"
+                )
+            except Exception:
+                pass
 
         # Update stats
         if pnl < 0:

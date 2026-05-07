@@ -24,6 +24,7 @@ class ScannerPipeline:
     """Core scanning pipeline — runs every N minutes."""
 
     def __init__(self):
+        self._last_trade_review = ""  # 上次交易复盘，传给下次 LLM 调用
         self.risk_checker = HardRiskChecker(
             max_daily_loss_pct=settings.max_daily_loss_pct,
             max_weekly_loss_pct=settings.max_weekly_loss_pct,
@@ -132,19 +133,8 @@ class ScannerPipeline:
 
             if gate.needs_llm:
                 logger.info("LLM GATE [%s]: %s → calling LLM", ticker, gate.reason)
-                # Analyze news with LLM (best-effort)
-                if news_items:
-                    try:
-                        await analyze_news(
-                            ticker=ticker,
-                            headline=news_items[0].headline,
-                            price_change=f"{market['change_pct']:+.2f}%",
-                            market_state=f"QQQ {market['change_pct']:+.2f}%",
-                        )
-                    except Exception:
-                        logger.warning("News analysis failed for %s", ticker)
 
-                # Build context for LLM
+                from app.llm.unified import pre_trade_analysis
                 news_summary = "; ".join(n.headline for n in news_items[:5]) or "无相关新闻"
                 pos_lines = []
                 for t, p in self.trader.positions.items():
@@ -152,16 +142,21 @@ class ScannerPipeline:
                 current_positions = "\n".join(pos_lines) if pos_lines else "无持仓"
                 account_state = f"可用资金: ${self.trader.cash:,.2f}\n累计盈亏: ${self.trader.get_total_pnl():,.2f}\n当日盈亏: ${self.daily_pnl:,.2f}\n连续亏损: {self.consecutive_losses}笔"
 
-                llm_result = await review_risk(
+                llm_result = await pre_trade_analysis(
                     ticker=ticker,
                     strategy=signal["strategy_name"],
                     entry_price=signal["entry_price"],
                     stop_loss=signal["stop_loss"],
+                    take_profit=signal["take_profit"],
                     position_pct=settings.max_single_position_pct,
                     market_state=f"QQQ {market['change_pct']:+.2f}%",
-                    news_summary=news_summary,
+                    rsi=indicators.get("rsi", 50),
+                    atr=indicators.get("atr", 0),
+                    volume_ratio=volume_ratio,
+                    news_headlines=news_summary,
                     current_positions=current_positions,
                     account_state=account_state,
+                    last_trade_review=getattr(self, "_last_trade_review", ""),
                 )
             else:
                 logger.info("LLM GATE [%s]: %s → skip LLM, auto=%s", ticker, gate.reason, gate.auto_action)
