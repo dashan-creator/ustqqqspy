@@ -19,8 +19,10 @@ class FinnhubAdapter(NewsAdapter):
         self.api_key = api_key
 
     async def fetch_ticker_news(self, ticker: str, limit: int = 10) -> list[NewsItem]:
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        yesterday = datetime.now(timezone.utc).replace(day=datetime.now(timezone.utc).day - 1).strftime("%Y-%m-%d")
+        from datetime import timedelta
+        now = datetime.now(timezone.utc)
+        today = now.strftime("%Y-%m-%d")
+        yesterday = (now - timedelta(days=1)).strftime("%Y-%m-%d")
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
                 resp = await client.get(

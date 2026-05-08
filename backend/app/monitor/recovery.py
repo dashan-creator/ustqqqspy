@@ -64,14 +64,19 @@ async def sync_after_reconnect(trader, broker, position_monitor=None) -> list[st
         # 计算断线期间盈亏
         pnl_pct = ((current_price - avg_price) / avg_price) * 100 if avg_price > 0 else 0
 
-        # 5. 异常仓位：亏损超过阈值，直接清仓
+        # 5. 异常仓位：亏损超过阈值，尝试清仓
         if pnl_pct < -(EMERGENCY_CLOSE_PCT * 100):
             logger.warning("EMERGENCY CLOSE %s: %.2f%% loss exceeds threshold", ticker, pnl_pct)
             try:
-                await broker.place_market_order(ticker, quantity, "sell")
-                if ticker in trader.positions:
-                    del trader.positions[ticker]
-                actions.append(f"EMERGENCY CLOSED {ticker}: {pnl_pct:+.1f}% loss (>{EMERGENCY_CLOSE_PCT*100}%)")
+                order = await broker.place_market_order(ticker, quantity, "sell")
+                if order.get("status") == "filled":
+                    if ticker in trader.positions:
+                        del trader.positions[ticker]
+                    actions.append(f"EMERGENCY CLOSED {ticker}: {pnl_pct:+.1f}% loss (filled)")
+                else:
+                    # Don't remove local position - order not confirmed
+                    logger.warning("Emergency close not filled: %s status=%s", ticker, order.get("status"))
+                    actions.append(f"EMERGENCY CLOSE PENDING {ticker}: {pnl_pct:+.1f}% (status={order.get('status')})")
             except Exception as e:
                 actions.append(f"Emergency close failed for {ticker}: {e}")
             continue

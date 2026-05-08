@@ -49,21 +49,14 @@ async def check_health(ibkr_broker=None, force: bool = False) -> HealthStatus:
 
     status = HealthStatus()
 
-    # Network check
-    try:
-        import httpx
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.get("https://httpbin.org/get")
-            status.network_up = resp.status_code == 200
-    except Exception:
-        status.network_up = False
-
-    # Market data check
+    # Market data check (if data works, network is up)
     try:
         quote = await market_data_service.get_quote("SPY")
         status.market_data = quote.get("price", 0) > 0
+        status.network_up = status.market_data
     except Exception:
         status.market_data = False
+        status.network_up = False
 
     # IBKR check
     if ibkr_broker:

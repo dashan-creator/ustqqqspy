@@ -24,13 +24,19 @@ async def scan_job():
     if hour < 13 or hour > 20:
         return
 
-    # Reset daily PnL at start of new trading day
-    if hasattr(scanner_pipeline.trader, "_last_reset_date"):
-        if scanner_pipeline.trader._last_reset_date != now.date():
-            scanner_pipeline.trader.daily_pnl = 0.0
-            scanner_pipeline.trader._last_reset_date = now.date()
-    else:
+    # Reset daily/weekly PnL at appropriate boundaries
+    if not hasattr(scanner_pipeline.trader, "_last_reset_date"):
         scanner_pipeline.trader._last_reset_date = now.date()
+        scanner_pipeline.trader._last_reset_week = now.isocalendar()[1]
+
+    if scanner_pipeline.trader._last_reset_date != now.date():
+        scanner_pipeline.trader.daily_pnl = 0.0
+        scanner_pipeline.trader._last_reset_date = now.date()
+
+    current_week = now.isocalendar()[1]
+    if scanner_pipeline.trader._last_reset_week != current_week:
+        scanner_pipeline.trader.weekly_pnl = 0.0
+        scanner_pipeline.trader._last_reset_week = current_week
 
     logger.info("Running scan...")
     events = await scanner_pipeline.run_scan()
@@ -40,12 +46,16 @@ async def scan_job():
     if position_monitor:
         close_events = await position_monitor.check_positions()
         for event in close_events:
-            msg = (
-                f"CLOSED: {event['ticker']} @ ${event['exit_price']:.2f}\n"
-                f"Reason: {event['reason']}\n"
-                f"PnL: ${event['pnl']:.2f} ({event['pnl_pct']:.2f}%)"
-            )
-            await send_message(msg)
+            etype = event.get("type", "")
+            if etype == "position_closed":
+                msg = (
+                    f"CLOSED: {event.get('ticker', '?')} @ ${event.get('exit_price', 0):.2f}\n"
+                    f"Reason: {event.get('reason', '')}\n"
+                    f"PnL: ${event.get('pnl', 0):.2f} ({event.get('pnl_pct', 0):.2f}%)"
+                )
+                await send_message(msg)
+            elif etype == "position_close_failed":
+                await send_message(f"CLOSE FAILED: {event.get('ticker', '?')} — {event.get('reason', '')}")
         events.extend(close_events)
 
         # LLM 持仓分析（有持仓时）
@@ -55,8 +65,11 @@ async def scan_job():
         if review:
             await send_message(review)
 
+    # Send scanner events (excluding position_closed which was already sent above)
     for event in events:
         etype = event.get("type", "")
+        if etype == "position_closed" or etype == "position_close_failed":
+            continue  # Already handled above
         if etype == "signal_executed":
             msg = (
                 f"SIGNAL: {event['ticker']} {event.get('direction', '').upper()}\n"
@@ -71,15 +84,6 @@ async def scan_job():
             await send_message(f"REJECTED: {event.get('ticker', '?')} [{event.get('strategy', '')}] — {event.get('reason', '')}")
         elif etype == "signal_pending":
             await send_message(f"PENDING: {event.get('ticker', '?')} — {event.get('reason', '')}")
-        elif etype == "position_closed":
-            msg = (
-                f"CLOSED: {event['ticker']} @ ${event.get('exit_price', 0):.2f}\n"
-                f"Reason: {event.get('reason', '')}\n"
-                f"PnL: ${event.get('pnl', 0):.2f} ({event.get('pnl_pct', 0):.2f}%)"
-            )
-            await send_message(msg)
-        elif etype == "position_close_failed":
-            await send_message(f"CLOSE FAILED: {event.get('ticker', '?')} — {event.get('reason', '')}")
 
     logger.info("Scan complete: %d events", len(events))
 

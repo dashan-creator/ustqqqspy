@@ -107,6 +107,16 @@ class ScannerPipeline:
         news_context = {"has_major_negative": False, "sentiment": "neutral"}
         if news_items:
             news_context["headlines"] = [n.headline for n in news_items[:5]]
+            # Detect negative headlines by keywords
+            negative_keywords = ["lawsuit", "fraud", "bankruptcy", "sec investigation", "downgrade",
+                                 "recall", "warning", "probe", "subpoena", "delisting", "cut jobs",
+                                 "restructuring", "loss", "decline", "plunge", "crash"]
+            for item in news_items[:5]:
+                hl = item.headline.lower()
+                if any(kw in hl for kw in negative_keywords):
+                    news_context["has_major_negative"] = True
+                    news_context["sentiment"] = "negative"
+                    break
 
         for strategy in STRATEGIES:
             signal = strategy.evaluate(ticker, bars, indicators, market, news=news_context)
