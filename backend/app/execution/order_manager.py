@@ -13,13 +13,13 @@ class OrderManager:
     def __init__(self, trader: PaperTrader):
         self.trader = trader
 
-    def execute_signal(self, signal: dict, quantity: int) -> dict:
+    def execute_signal(self, signal: dict, quantity: float) -> dict:
         ticker = signal["ticker"]
         price = signal["entry_price"]
         strategy = signal["strategy_name"]
         reason = signal.get("reason", "")
         order = self.trader.buy(ticker, quantity, price, strategy, reason)
-        logger.info("Paper BUY %s x%d @ %.2f [%s]", ticker, quantity, price, strategy)
+        logger.info("Paper BUY %s x%.4f @ %.2f [%s]", ticker, quantity, price, strategy)
         return order
 
     def close_position(self, ticker: str, price: float, reason: str) -> dict:

@@ -46,7 +46,7 @@ class PaperTrader:
             "weekly_pnl": self.weekly_pnl,
         })
 
-    def buy(self, ticker: str, quantity: int, price: float, strategy: str, reason: str) -> dict:
+    def buy(self, ticker: str, quantity: float, price: float, strategy: str, reason: str) -> dict:
         if quantity <= 0 or price <= 0:
             return {'ticker': ticker, 'side': 'buy', 'quantity': quantity, 'filled_price': price, 'status': 'rejected', 'strategy': strategy, 'reason': 'invalid order', 'timestamp': ''}
 
@@ -73,7 +73,7 @@ class PaperTrader:
         self._save()
         return order
 
-    def sell(self, ticker: str, quantity: int, price: float, reason: str) -> dict:
+    def sell(self, ticker: str, quantity: float, price: float, reason: str) -> dict:
         if ticker not in self.positions:
             return {"ticker": ticker, "side": "sell", "status": "rejected", "reason": "no position"}
 
