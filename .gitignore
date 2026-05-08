@@ -15,3 +15,4 @@ node_modules/
 *.db
 next-env.d.ts
 backend/data/
+*.env.live
