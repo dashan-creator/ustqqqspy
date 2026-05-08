@@ -33,14 +33,17 @@ class IBKRProvider(MarketDataProvider):
             duration_map = {"1d": "1 D", "5d": "5 D", "1mo": "1 M", "3mo": "3 M"}
             duration = duration_map.get(period, "5 D")
 
-            bars = await asyncio.to_thread(
-                self.broker.ib.reqHistoricalData,
-                contract,
-                endDateTime="",
-                durationStr=duration,
-                barSizeSetting=bar_size,
-                whatToShow="TRADES",
-                useRTH=True,
+            bars = await asyncio.wait_for(
+                asyncio.to_thread(
+                    self.broker.ib.reqHistoricalData,
+                    contract,
+                    endDateTime="",
+                    durationStr=duration,
+                    barSizeSetting=bar_size,
+                    whatToShow="TRADES",
+                    useRTH=True,
+                ),
+                timeout=15.0,
             )
 
             if not bars:
