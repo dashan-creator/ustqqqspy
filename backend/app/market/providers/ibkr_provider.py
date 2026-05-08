@@ -60,8 +60,19 @@ class IBKRProvider(MarketDataProvider):
         if not self.broker or not self.broker.is_connected:
             return {"ticker": ticker, "price": 0, "change_pct": 0, "volume": 0}
         try:
-            price = await self.broker.get_realtime_price(ticker)
-            return {"ticker": ticker, "price": price, "change_pct": 0, "volume": 0}
+            # Use historical bars for quote (works without real-time subscription)
+            bars = await self.get_bars(ticker, interval="1D", period="2d")
+            if not bars.empty and len(bars) > 0:
+                last = bars.iloc[-1]
+                price = float(last["close"])
+                # Calculate change from previous day
+                change_pct = 0.0
+                if len(bars) > 1:
+                    prev_close = float(bars.iloc[-2]["close"])
+                    if prev_close > 0:
+                        change_pct = ((price - prev_close) / prev_close) * 100
+                return {"ticker": ticker, "price": price, "change_pct": round(change_pct, 2), "volume": int(last.get("volume", 0))}
+            return {"ticker": ticker, "price": 0, "change_pct": 0, "volume": 0}
         except Exception as e:
             logger.warning("IBKR get_quote failed for %s: %s", ticker, e)
             return {"ticker": ticker, "price": 0, "change_pct": 0, "volume": 0}
