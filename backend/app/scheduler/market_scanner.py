@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import datetime, timezone
 
@@ -39,7 +40,14 @@ async def scan_job():
         scanner_pipeline.trader._last_reset_week = current_week
 
     logger.info("Running scan...")
-    events = await scanner_pipeline.run_scan()
+    try:
+        events = await asyncio.wait_for(scanner_pipeline.run_scan(), timeout=120)
+    except asyncio.TimeoutError:
+        logger.error("Scan timed out after 120s")
+        return
+    except Exception as e:
+        logger.error("Scan failed: %s", e)
+        return
 
     # Check open positions for stop-loss / take-profit
     position_monitor = _get_position_monitor()
@@ -110,6 +118,7 @@ async def daily_report_job():
 
 def create_scheduler() -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(scan_job, "interval", minutes=settings.scan_interval_minutes, id="market_scan")
+    scheduler.add_job(scan_job, "interval", minutes=settings.scan_interval_minutes, id="market_scan",
+                      max_instances=1, misfire_grace_time=300, coalesce=True)
     scheduler.add_job(daily_report_job, "cron", hour=20, minute=5, id="daily_report")
     return scheduler

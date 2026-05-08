@@ -37,7 +37,7 @@ class IBKRProvider(MarketDataProvider):
                 self.broker.ib.reqHistoricalData,
                 contract,
                 endDateTime="",
-                duration=duration,
+                durationStr=duration,
                 barSizeSetting=bar_size,
                 whatToShow="TRADES",
                 useRTH=True,
