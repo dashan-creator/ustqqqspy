@@ -47,8 +47,14 @@ async def sync_with_db(trader) -> list[str]:
 
     # State file already loaded in PaperTrader.__init__
     # If we have positions or trades from file, we're good
+    risk_state = {
+        "consecutive_losses": getattr(trader, "consecutive_losses", 0),
+        "daily_pnl": getattr(trader, "daily_pnl", 0.0),
+        "weekly_pnl": getattr(trader, "weekly_pnl", 0.0),
+    }
+
     if trader.positions or trader.trades:
-        save_state(trader.cash, trader.positions, trader.trades)
+        save_state(trader.cash, trader.positions, trader.trades, risk_state=risk_state)
         actions.append(f"State from file: cash={trader.cash:.2f}, positions={len(trader.positions)}, trades={len(trader.trades)}")
         return actions
 

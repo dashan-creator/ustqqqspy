@@ -97,8 +97,14 @@ class ScannerPipeline:
 
         indicators = market_data_service.compute_indicators(bars)
 
+        # Fetch news before strategy evaluation (used by mean reversion filter)
+        news_items = await self.news_service.get_ticker_news(ticker)
+        news_context = {"has_major_negative": False, "sentiment": "neutral"}
+        if news_items:
+            news_context["headlines"] = [n.headline for n in news_items[:5]]
+
         for strategy in STRATEGIES:
-            signal = strategy.evaluate(ticker, bars, indicators, market)
+            signal = strategy.evaluate(ticker, bars, indicators, market, news=news_context)
             if signal is None:
                 continue
 
@@ -107,13 +113,16 @@ class ScannerPipeline:
                 logger.info("SKIP %s: already holding %d shares", ticker, self.trader.positions[ticker]["quantity"])
                 return None
 
+            # Estimate daily volume: sum of all bars' volume * avg price
+            total_vol = bars["volume"].sum() * bars["close"].mean() if len(bars) > 0 else 0
+
             risk_result = self.risk_checker.check(
                 position_pct=settings.max_single_position_pct,
                 current_positions=len(self.trader.positions),
                 daily_pnl_pct=self.daily_pnl / self.trader.initial_cash if self.trader.initial_cash > 0 else 0,
                 weekly_pnl_pct=self.weekly_pnl / self.trader.initial_cash if self.trader.initial_cash > 0 else 0,
                 consecutive_losses=self.consecutive_losses,
-                daily_volume_usd=bars["volume"].iloc[-1] * bars["close"].iloc[-1],
+                daily_volume_usd=total_vol,
             )
 
             if not risk_result.approved:
@@ -126,7 +135,6 @@ class ScannerPipeline:
 
             # Smart Gate: decide if LLM is needed
             from app.llm.smart_gate import smart_gate
-            news_items = await self.news_service.get_ticker_news(ticker)
             volume_ratio = indicators.get("volume_ratio", 1.0)
             if volume_ratio == 0:
                 volume_ratio = 1.0
@@ -192,8 +200,14 @@ class ScannerPipeline:
                     effective_pct = suggested
                     logger.info("Reducing position to %.1f%% per LLM", effective_pct)
 
+            # Update account value for accurate sizing
+            self.position_manager.account_value = self.trader.cash + sum(
+                p.get("avg_price", 0) * p.get("quantity", 0)
+                for p in self.trader.positions.values()
+            )
+
             quantity = self.position_manager.calculate_quantity(
-                signal["entry_price"], effective_pct,
+                signal["entry_price"], effective_pct, stop_loss=signal["stop_loss"],
             )
             if quantity <= 0:
                 continue

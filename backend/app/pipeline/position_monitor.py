@@ -104,9 +104,12 @@ class PositionMonitor:
                         "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
             except Exception as e:
-                logger.error("IBKR sell failed for %s: %s, falling back to paper", ticker, e)
-                self.trader.sell(ticker, quantity, current_price, reason)
-                broker = "paper_fallback"
+                logger.error("IBKR sell failed for %s: %s, NOT falling back to paper (position may still exist)", ticker, e)
+                return {
+                    "type": "position_close_failed", "ticker": ticker,
+                    "reason": f"IBKR sell exception: {e}",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
         else:
             self.trader.sell(ticker, quantity, current_price, reason)
             broker = "paper"

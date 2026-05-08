@@ -53,14 +53,23 @@ class MarketDataService:
         if cached and time.monotonic() - cached[0] < self._cache_ttl:
             return cached[1]
 
+        best_quote: dict = {}
         for provider in self.providers:
             try:
                 quote = await provider.get_quote(ticker)
                 if quote.get("price", 0) > 0:
-                    self._quote_cache[ticker] = (time.monotonic(), quote)
-                    return quote
+                    if not best_quote:
+                        best_quote = quote
+                    else:
+                        # Merge: keep best change_pct if primary has 0
+                        if best_quote.get("change_pct", 0) == 0 and quote.get("change_pct", 0) != 0:
+                            best_quote["change_pct"] = quote["change_pct"]
             except Exception as e:
                 logger.warning("Provider %s quote failed for %s: %s", provider.name, ticker, e)
+
+        if best_quote:
+            self._quote_cache[ticker] = (time.monotonic(), best_quote)
+            return best_quote
 
         if cached:
             return cached[1]

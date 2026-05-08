@@ -48,19 +48,30 @@ async def scan_job():
             await send_message(review)
 
     for event in events:
-        if event.get("type") == "signal_executed":
+        etype = event.get("type", "")
+        if etype == "signal_executed":
             msg = (
-                f"SIGNAL: {event['ticker']} {event['direction'].upper()}\n"
-                f"Strategy: {event['strategy']}\n"
-                f"Price: ${event['entry_price']:.2f}\n"
-                f"Stop: ${event['stop_loss']:.2f}\n"
-                f"Qty: {event['quantity']}\n"
+                f"SIGNAL: {event['ticker']} {event.get('direction', '').upper()}\n"
+                f"Strategy: {event.get('strategy', '')}\n"
+                f"Price: ${event.get('entry_price', 0):.2f}\n"
+                f"Stop: ${event.get('stop_loss', 0):.2f}\n"
+                f"Qty: {event.get('quantity', 0)}\n"
                 f"LLM: {event.get('llm_action', 'N/A')} (risk={event.get('llm_risk_score', '?')})"
             )
             await send_message(msg)
-        elif event.get("type") == "signal_rejected":
-            msg = f"REJECTED: {event['ticker']} [{event['strategy']}] — {event['reason']}"
+        elif etype == "signal_rejected":
+            await send_message(f"REJECTED: {event.get('ticker', '?')} [{event.get('strategy', '')}] — {event.get('reason', '')}")
+        elif etype == "signal_pending":
+            await send_message(f"PENDING: {event.get('ticker', '?')} — {event.get('reason', '')}")
+        elif etype == "position_closed":
+            msg = (
+                f"CLOSED: {event['ticker']} @ ${event.get('exit_price', 0):.2f}\n"
+                f"Reason: {event.get('reason', '')}\n"
+                f"PnL: ${event.get('pnl', 0):.2f} ({event.get('pnl_pct', 0):.2f}%)"
+            )
             await send_message(msg)
+        elif etype == "position_close_failed":
+            await send_message(f"CLOSE FAILED: {event.get('ticker', '?')} — {event.get('reason', '')}")
 
     logger.info("Scan complete: %d events", len(events))
 
