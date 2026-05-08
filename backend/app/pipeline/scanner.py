@@ -222,6 +222,12 @@ class ScannerPipeline:
                         self.trader.cash -= quantity * price
                 else:
                     logger.warning("IBKR order not filled: %s status=%s", ticker, order.get("status"))
+                    return {
+                        "type": "signal_pending", "ticker": ticker,
+                        "strategy": signal["strategy_name"],
+                        "reason": f"IBKR order not filled: {order.get('status')}",
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                    }
             else:
                 order = self.order_manager.execute_signal(signal, quantity)
 

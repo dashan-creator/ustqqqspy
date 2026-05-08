@@ -31,12 +31,20 @@ class PaperTrader:
             self.cash = state.get("cash", self.initial_cash)
             self.positions = state.get("positions", {})
             self.trades = state.get("trades", [])
-            logger.info("Restored state: cash=%.2f, positions=%d, trades=%d",
-                        self.cash, len(self.positions), len(self.trades))
+            risk = state.get("risk_state", {})
+            self.consecutive_losses = risk.get("consecutive_losses", 0)
+            self.daily_pnl = risk.get("daily_pnl", 0.0)
+            self.weekly_pnl = risk.get("weekly_pnl", 0.0)
+            logger.info("Restored state: cash=%.2f, positions=%d, trades=%d, consecutive_losses=%d",
+                        self.cash, len(self.positions), len(self.trades), self.consecutive_losses)
 
     def _save(self, highest_prices: dict | None = None):
         """Persist state to disk after every trade."""
-        save_state(self.cash, self.positions, self.trades, highest_prices)
+        save_state(self.cash, self.positions, self.trades, highest_prices, risk_state={
+            "consecutive_losses": self.consecutive_losses,
+            "daily_pnl": self.daily_pnl,
+            "weekly_pnl": self.weekly_pnl,
+        })
 
     def buy(self, ticker: str, quantity: int, price: float, strategy: str, reason: str) -> dict:
         if quantity <= 0 or price <= 0:

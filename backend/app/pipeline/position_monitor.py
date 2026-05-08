@@ -119,7 +119,7 @@ class PositionMonitor:
             "ticker": ticker,
             "strategy": strategy,
             "entry_price": entry_price,
-            "exit_price": current_price,
+            "exit_price": actual_exit_price,
             "quantity": quantity,
             "pnl": round(pnl, 2),
             "pnl_pct": round(pnl_pct, 2),
@@ -128,8 +128,8 @@ class PositionMonitor:
         }
         await persist_trade(trade_record)
 
-        # Update trader stats (paper mode: trader.sell already appended; IBKR: we need to)
-        if broker != "paper":
+        # Update trader stats (paper/paper_fallback: trader.sell already appended; IBKR: we need to)
+        if broker == "ibkr":
             self.trader.trades.append(trade_record)
         self.trader.daily_pnl += pnl
         self.trader.weekly_pnl += pnl
@@ -141,7 +141,7 @@ class PositionMonitor:
                 ticker=ticker,
                 strategy=strategy,
                 entry_price=entry_price,
-                exit_price=current_price,
+                exit_price=actual_exit_price,
                 pnl_pct=round(pnl_pct, 2),
                 entry_reason=pos.get("entry_reason", ""),
                 exit_reason=reason,
@@ -172,13 +172,13 @@ class PositionMonitor:
         # Clean up tracking
         self.highest_prices.pop(ticker, None)
 
-        logger.info("CLOSED %s @ %.2f [%s] PnL: $%.2f (%.2f%%)", ticker, current_price, reason, pnl, pnl_pct)
+        logger.info("CLOSED %s @ %.2f [%s] PnL: $%.2f (%.2f%%)", ticker, actual_exit_price, reason, pnl, pnl_pct)
 
         return {
             "type": "position_closed",
             "ticker": ticker,
             "entry_price": entry_price,
-            "exit_price": current_price,
+            "exit_price": actual_exit_price,
             "quantity": quantity,
             "pnl": round(pnl, 2),
             "pnl_pct": round(pnl_pct, 2),
