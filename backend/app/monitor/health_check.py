@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass
 
 from app.market.data_service import market_data_service
 
 logger = logging.getLogger(__name__)
+
+_last_check_time = 0
+_last_status: HealthStatus | None = None
+_CACHE_TTL = 120  # cache health check for 2 minutes
 
 
 @dataclass
@@ -34,11 +39,17 @@ class HealthStatus:
         }
 
 
-async def check_health(ibkr_broker=None) -> HealthStatus:
-    """Check all external dependencies."""
+async def check_health(ibkr_broker=None, force: bool = False) -> HealthStatus:
+    """Check all external dependencies. Results cached for 2 minutes."""
+    global _last_check_time, _last_status
+
+    now = time.monotonic()
+    if not force and _last_status and (now - _last_check_time) < _CACHE_TTL:
+        return _last_status
+
     status = HealthStatus()
 
-    # Network check (try fetching a known endpoint)
+    # Network check
     try:
         import httpx
         async with httpx.AsyncClient(timeout=5.0) as client:
@@ -58,7 +69,7 @@ async def check_health(ibkr_broker=None) -> HealthStatus:
     if ibkr_broker:
         status.ibkr_connected = ibkr_broker.is_connected
 
-    # LLM check (lightweight - just check if endpoint responds)
+    # LLM check
     try:
         from app.config import settings
         import httpx
@@ -71,4 +82,6 @@ async def check_health(ibkr_broker=None) -> HealthStatus:
     except Exception:
         status.llm_available = False
 
+    _last_check_time = now
+    _last_status = status
     return status

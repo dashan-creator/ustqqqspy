@@ -24,6 +24,14 @@ async def scan_job():
     if hour < 13 or hour > 20:
         return
 
+    # Reset daily PnL at start of new trading day
+    if hasattr(scanner_pipeline.trader, "_last_reset_date"):
+        if scanner_pipeline.trader._last_reset_date != now.date():
+            scanner_pipeline.trader.daily_pnl = 0.0
+            scanner_pipeline.trader._last_reset_date = now.date()
+    else:
+        scanner_pipeline.trader._last_reset_date = now.date()
+
     logger.info("Running scan...")
     events = await scanner_pipeline.run_scan()
 

@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
     from app.config import settings
     from app.pipeline.scanner import scanner_pipeline
     from app.scheduler.market_scanner import create_scheduler
-    from app.telegram.bot import set_pipeline, start_telegram
+    from app.telegram.bot import set_pipeline, start_telegram, stop_telegram
 
     # IBKR connection (optional)
     if settings.use_ibkr:
@@ -62,6 +62,7 @@ async def lifespan(app: FastAPI):
     await start_telegram()
 
     yield
+    await stop_telegram()
     if scanner_pipeline.ibkr_broker:
         scanner_pipeline.ibkr_broker.disconnect()
     scheduler.shutdown()

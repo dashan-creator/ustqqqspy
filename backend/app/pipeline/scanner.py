@@ -6,16 +6,13 @@ from datetime import datetime, timezone
 from app.config import settings
 from app.market.data_service import market_data_service
 from app.strategy import STRATEGIES
-from app.llm import review_risk, analyze_news
 from app.news import NewsService
 from app.news.adapters.finnhub import FinnhubAdapter
 from app.news.adapters.polygon import PolygonAdapter
-from app.models.llm_report import LLMReport
-from app.models.db import async_session
 from app.risk import CircuitBreaker, HardRiskChecker, PositionManager
 from app.execution.paper_trader import PaperTrader
 from app.execution.order_manager import OrderManager
-from app.execution.persistence import persist_signal, persist_order, persist_trade
+from app.execution.persistence import persist_signal, persist_order
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +30,8 @@ class ScannerPipeline:
             consecutive_loss_limit=settings.consecutive_loss_limit,
         )
         self.circuit_breaker = CircuitBreaker()
-        self.position_manager = PositionManager()
-        self.trader = PaperTrader()
+        self.trader = PaperTrader(initial_cash=settings.initial_cash)
+        self.position_manager = PositionManager(account_value=settings.initial_cash)
         self.order_manager = OrderManager(self.trader)
         # Initialize news service with available adapters
         news_adapters = []
@@ -121,8 +118,10 @@ class ScannerPipeline:
                 logger.info("SKIP %s: already holding %d shares", ticker, self.trader.positions[ticker]["quantity"])
                 return None
 
-            # Estimate daily volume: sum of all bars' volume * avg price
-            total_vol = bars["volume"].sum() * bars["close"].mean() if len(bars) > 0 else 0
+            # Estimate daily volume: use the most recent full day's volume * close
+            # For 15m bars, ~26 bars per day; use last 26 bars as proxy for one day
+            day_bars = bars.tail(26) if len(bars) >= 26 else bars
+            total_vol = float(day_bars["volume"].sum() * day_bars["close"].mean()) if len(day_bars) > 0 else 0
 
             risk_result = self.risk_checker.check(
                 position_pct=settings.max_single_position_pct,
@@ -208,15 +207,19 @@ class ScannerPipeline:
                     effective_pct = suggested
                     logger.info("Reducing position to %.1f%% per LLM", effective_pct)
 
-            # Update account value for accurate sizing
-            self.position_manager.account_value = self.trader.cash + sum(
-                p.get("avg_price", 0) * p.get("quantity", 0)
-                for p in self.trader.positions.values()
-            )
+            # Update account value with current market prices
+            market_value = 0
+            for t, p in self.trader.positions.items():
+                q = await market_data_service.get_quote(t)
+                cp = q.get("price", p.get("avg_price", 0))
+                market_value += cp * p.get("quantity", 0)
+            self.position_manager.account_value = self.trader.cash + market_value
 
-            quantity = self.position_manager.calculate_quantity(
+            raw_qty = self.position_manager.calculate_quantity(
                 signal["entry_price"], effective_pct, stop_loss=signal["stop_loss"],
             )
+            # Round to 4 decimal places (IBKR minimum lot)
+            quantity = round(raw_qty, 4) if raw_qty > 0 else 0
             if quantity <= 0:
                 continue
 
@@ -263,12 +266,14 @@ class ScannerPipeline:
                 self.trader.positions[ticker]["entry_reason"] = signal.get("reason", "")
                 self.trader.positions[ticker]["atr"] = indicators.get("atr", signal["entry_price"] * 0.02)
 
+            actual_entry = order.get("filled_price", signal["entry_price"]) or signal["entry_price"]
+
             return {
                 "type": "signal_executed", "ticker": ticker,
                 "broker": "ibkr" if (self.ibkr_broker and self.ibkr_broker.is_connected) else "paper",
                 "strategy": signal["strategy_name"],
                 "direction": signal["direction"],
-                "entry_price": signal["entry_price"],
+                "entry_price": actual_entry,
                 "stop_loss": signal["stop_loss"],
                 "take_profit": signal["take_profit"],
                 "quantity": quantity,
@@ -306,26 +311,5 @@ class ScannerPipeline:
             "ibkr_account": ibkr_account,
         }
 
-
-    async def _persist_llm_report(self, symbol_id: int | None, report_type: str, source_text: str, llm_result: dict) -> None:
-        try:
-            async with async_session() as session:
-                report = LLMReport(
-                    symbol_id=symbol_id,
-                    report_type=report_type,
-                    source_text=source_text,
-                    summary=llm_result.get('reason'),
-                    sentiment=llm_result.get('sentiment'),
-                    impact_score=llm_result.get('impact_score'),
-                    risk_score=llm_result.get('risk_score'),
-                    risk_flags=llm_result.get('risk_flags'),
-                    suggested_action=llm_result.get('action'),
-                    model_used=llm_result.get('_model'),
-                    latency_ms=llm_result.get('_latency_ms'),
-                )
-                session.add(report)
-                await session.commit()
-        except Exception:
-            logger.exception('Failed to persist LLM report')
 
 scanner_pipeline = ScannerPipeline()

@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     max_concurrent_positions: int = 2
     max_single_position_pct: float = 2.0
     consecutive_loss_limit: int = 3
+    initial_cash: float = 100_000.0
     # App
     admin_api_key: str = ""
     debug: bool = False
