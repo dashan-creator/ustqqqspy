@@ -39,13 +39,13 @@ async def lifespan(app: FastAPI):
     for a in actions:
         logging.info("State sync: %s", a)
 
-    # Initialize market data providers
+    # Initialize market data providers (yfinance primary, IBKR backup)
     from app.market.data_service import market_data_service
     from app.market.providers import YFinanceProvider
     providers = [YFinanceProvider()]
     if scanner_pipeline.ibkr_broker:
         from app.market.providers import IBKRProvider
-        providers.insert(0, IBKRProvider(scanner_pipeline.ibkr_broker))
+        providers.append(IBKRProvider(scanner_pipeline.ibkr_broker))
     market_data_service.set_providers(providers)
 
     # Initialize position monitor
