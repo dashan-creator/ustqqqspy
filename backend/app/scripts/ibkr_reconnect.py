@@ -72,6 +72,35 @@ def start_gateway():
         return False
 
 
+def sync_positions():
+    """重连后同步 IBKR 持仓到本地。"""
+    import asyncio
+    import sys
+    sys.path.insert(0, os.path.expanduser("~/project/usstock/backend"))
+    os.environ["PYTHONPATH"] = os.path.expanduser("~/project/usstock/backend")
+
+    try:
+        from app.execution.broker import IBKRBroker
+        from app.execution.paper_trader import PaperTrader
+        from app.monitor.recovery import sync_after_reconnect
+
+        async def _sync():
+            broker = IBKRBroker(host="127.0.0.1", port=7497, client_id=1)
+            ok = await broker.connect()
+            if not ok:
+                logger.error("Cannot sync: IBKR not connected")
+                return
+            trader = PaperTrader()
+            actions = await sync_after_reconnect(trader, broker)
+            for a in actions:
+                logger.info("Recovery: %s", a)
+            broker.disconnect()
+
+        asyncio.run(_sync())
+    except Exception as e:
+        logger.error("Position sync failed: %s", e)
+
+
 def restart_backend():
     """重启后端进程。"""
     try:
@@ -127,6 +156,7 @@ def main():
                     logger.warning("IB Gateway not running, restarting...")
                     kill_gateway()
                     if start_gateway():
+                        sync_positions()
                         restart_backend()
                         last_reconnect = now
                     else:

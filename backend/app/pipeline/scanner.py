@@ -67,6 +67,14 @@ class ScannerPipeline:
             events.append({"type": "skipped", "reason": reason})
             return events
 
+        # Health check before scanning
+        from app.monitor.health_check import check_health
+        health = await check_health(self.ibkr_broker)
+        if not health.can_scan:
+            logger.warning("System unhealthy, skipping scan: %s", health.to_dict())
+            events.append({"type": "scan_skipped", "reason": f"unhealthy: {health.to_dict()}"})
+            return events
+
         market = await market_data_service.get_market_context("QQQ")
 
         for ticker in settings.symbol_list:
