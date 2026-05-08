@@ -41,42 +41,47 @@ def load_state() -> dict | None:
 
 
 async def sync_with_db(trader) -> list[str]:
-    """Reconcile in-memory state with DB orders. Returns list of actions taken."""
-    from app.models.db import async_session
-    from app.models.order import Order
-    from sqlalchemy import select
-
+    """Reconcile in-memory state with DB. State file is primary; DB is backup."""
     actions = []
+
+    # State file already loaded in PaperTrader.__init__
+    # If we have positions or trades from file, we're good
+    if trader.positions or trader.trades:
+        save_state(trader.cash, trader.positions, trader.trades)
+        actions.append(f"State from file: cash={trader.cash:.2f}, positions={len(trader.positions)}, trades={len(trader.trades)}")
+        return actions
+
+    # State file empty — try to rebuild cash from DB orders
     try:
+        from app.models.db import async_session
+        from app.models.order import Order
+        from sqlalchemy import select
+
         async with async_session() as session:
-            # Get all filled orders from DB
             result = await session.execute(
                 select(Order).where(Order.status == "filled").order_by(Order.id)
             )
             db_orders = result.scalars().all()
 
-            # Rebuild state from DB orders
-            db_cash = 100_000.0
-            db_positions = {}
-
-            for order in db_orders:
-                if order.side == "buy":
+            if db_orders:
+                db_cash = 100_000.0
+                for order in db_orders:
                     cost = order.quantity * (order.filled_price or 0)
-                    db_cash -= cost
-                    # Find ticker from filled_price pattern (we don't store ticker in orders)
-                    # This is a limitation - for now we trust in-memory state
-                elif order.side == "sell":
-                    revenue = order.quantity * (order.filled_price or 0)
-                    db_cash += revenue
+                    if order.side == "buy":
+                        db_cash -= cost
+                    elif order.side == "sell":
+                        db_cash += cost
+                trader.cash = db_cash
+                save_state(trader.cash, trader.positions, trader.trades)
+                actions.append(f"Rebuilt cash from DB: ${db_cash:.2f} ({len(db_orders)} orders)")
+            else:
+                save_state(trader.cash, trader.positions, trader.trades)
+                actions.append("Fresh start: no prior state found")
 
-            # If DB has more recent data than memory, use DB
-            if len(db_orders) > 0 and len(trader.orders) == 0:
-                logger.info("Sync: DB has %d orders, memory empty. Using DB state.", len(db_orders))
-                actions.append(f"Restored {len(db_orders)} orders from DB")
-
-            # Save current state
-            save_state(trader.cash, trader.positions, trader.trades)
-            actions.append("State saved to disk")
+    except Exception as e:
+        logger.warning("DB sync failed: %s", e)
+        save_state(trader.cash, trader.positions, trader.trades)
+        actions.append(f"DB sync failed: {e}")
 
     except Exception as e:
         logger.warning("DB sync failed: %s", e)

@@ -86,31 +86,33 @@ class PositionMonitor:
         strategy = pos.get("strategy", "")
 
         # Execute close
+        actual_exit_price = current_price
         if self.ibkr_broker and self.ibkr_broker.is_connected:
             try:
                 order = await self.ibkr_broker.place_market_order(ticker, quantity, "sell")
                 broker = "ibkr"
-                # Clear local position tracking after IBKR sell
                 if order.get("status") == "filled":
-                    sold_price = order.get("filled_price", current_price)
-                    self.trader.cash += quantity * sold_price
-                    del self.trader.positions[ticker]
-                else:
-                    logger.warning("IBKR sell not filled: %s status=%s", ticker, order.get("status"))
-                    # Still remove local position to avoid repeated sell attempts
+                    actual_exit_price = order.get("filled_price", current_price) or current_price
+                    self.trader.cash += quantity * actual_exit_price
                     if ticker in self.trader.positions:
-                        self.trader.cash += quantity * current_price
                         del self.trader.positions[ticker]
+                else:
+                    logger.warning("IBKR sell not filled: %s status=%s, NOT clearing position", ticker, order.get("status"))
+                    return {
+                        "type": "position_close_failed", "ticker": ticker,
+                        "reason": f"IBKR sell not filled: {order.get('status')}",
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                    }
             except Exception as e:
-                logger.error("IBKR sell failed for %s: %s", ticker, e)
-                order = self.trader.sell(ticker, quantity, current_price, reason)
+                logger.error("IBKR sell failed for %s: %s, falling back to paper", ticker, e)
+                self.trader.sell(ticker, quantity, current_price, reason)
                 broker = "paper_fallback"
         else:
-            order = self.trader.sell(ticker, quantity, current_price, reason)
+            self.trader.sell(ticker, quantity, current_price, reason)
             broker = "paper"
 
-        pnl = (current_price - entry_price) * quantity
-        pnl_pct = ((current_price - entry_price) / entry_price * 100) if entry_price > 0 else 0
+        pnl = (actual_exit_price - entry_price) * quantity
+        pnl_pct = ((actual_exit_price - entry_price) / entry_price * 100) if entry_price > 0 else 0
 
         # Persist trade
         trade_record = {
@@ -126,8 +128,9 @@ class PositionMonitor:
         }
         await persist_trade(trade_record)
 
-        # Update trader stats
-        self.trader.trades.append(trade_record)
+        # Update trader stats (paper mode: trader.sell already appended; IBKR: we need to)
+        if broker != "paper":
+            self.trader.trades.append(trade_record)
         self.trader.daily_pnl += pnl
         self.trader.weekly_pnl += pnl
 

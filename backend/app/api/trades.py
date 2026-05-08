@@ -7,6 +7,7 @@ from app.api.deps import get_pipeline
 from app.api.security import require_admin
 from app.models.db import async_session
 from app.models.trade import Trade
+from app.models.symbol import Symbol
 
 router = APIRouter(prefix="/api/trades", tags=["trades"])
 
@@ -18,11 +19,16 @@ async def list_trades(_admin: None = Depends(require_admin)):
     db_trades = []
     try:
         async with async_session() as session:
-            result = await session.execute(select(Trade).order_by(Trade.closed_at.desc()).limit(100))
-            for t in result.scalars():
+            result = await session.execute(
+                select(Trade, Symbol.ticker)
+                .join(Symbol, Trade.symbol_id == Symbol.id, isouter=True)
+                .order_by(Trade.closed_at.desc())
+                .limit(100)
+            )
+            for t, ticker in result.all():
                 db_trades.append({
                     "id": t.id,
-                    "ticker": f"symbol_{t.symbol_id}",
+                    "ticker": ticker or f"symbol_{t.symbol_id}",
                     "strategy": t.strategy_name,
                     "entry_price": t.entry_price,
                     "exit_price": t.exit_price,
