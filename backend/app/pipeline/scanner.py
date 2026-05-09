@@ -31,7 +31,10 @@ class ScannerPipeline:
         )
         self.circuit_breaker = CircuitBreaker()
         self.trader = PaperTrader(initial_cash=settings.initial_cash)
-        self.position_manager = PositionManager(account_value=settings.initial_cash)
+        self.position_manager = PositionManager(
+            account_value=settings.initial_cash,
+            max_position_pct=settings.max_single_position_pct,
+        )
         self.order_manager = OrderManager(self.trader)
         # Initialize news service with available adapters
         news_adapters = []
@@ -269,6 +272,15 @@ class ScannerPipeline:
                     }
             else:
                 order = self.order_manager.execute_signal(signal, quantity)
+                # Check if paper order was actually filled
+                if order.get("status") != "filled":
+                    logger.warning("Paper order rejected: %s reason=%s", ticker, order.get("reason"))
+                    return {
+                        "type": "signal_rejected", "ticker": ticker,
+                        "strategy": signal["strategy_name"],
+                        "reason": f"Paper order rejected: {order.get('reason', 'unknown')}",
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                    }
 
             # Persist order to DB
             await persist_order(order)

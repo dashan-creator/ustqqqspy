@@ -23,6 +23,7 @@ async def scan_job():
     hour = now.hour
 
     if hour < 13 or hour > 20:
+        logger.debug("Outside market hours (UTC %d), skipping scan", hour)
         return
 
     # Reset daily/weekly PnL at appropriate boundaries
@@ -39,11 +40,12 @@ async def scan_job():
         scanner_pipeline.trader.weekly_pnl = 0.0
         scanner_pipeline.trader._last_reset_week = current_week
 
-    logger.info("Running scan...")
+    scan_timeout = 90
+    logger.info("Running scan (timeout=%ds)...", scan_timeout)
     try:
-        events = await asyncio.wait_for(scanner_pipeline.run_scan(), timeout=90)
+        events = await asyncio.wait_for(scanner_pipeline.run_scan(), timeout=scan_timeout)
     except asyncio.TimeoutError:
-        logger.error("Scan timed out after 120s")
+        logger.error("Scan timed out after %ds", scan_timeout)
         return
     except Exception as e:
         logger.error("Scan failed: %s", e)
