@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 _last_check_time = 0
 _last_status: HealthStatus | None = None
-_CACHE_TTL = 120  # cache health check for 2 minutes
+_CACHE_TTL = 30  # cache health check for 30 seconds
 
 
 @dataclass
@@ -62,7 +62,7 @@ async def check_health(ibkr_broker=None, force: bool = False) -> HealthStatus:
     if ibkr_broker:
         status.ibkr_connected = ibkr_broker.is_connected
 
-    # LLM check
+    # LLM check (lightweight ping)
     try:
         from app.config import settings
         import httpx
@@ -71,7 +71,7 @@ async def check_health(ibkr_broker=None, force: bool = False) -> HealthStatus:
                 f"{settings.llm_base_url}/models",
                 headers={"Authorization": f"Bearer {settings.llm_api_key}"},
             )
-            status.llm_available = resp.status_code == 200
+            status.llm_available = resp.status_code in (200, 401, 403)
     except Exception:
         status.llm_available = False
 

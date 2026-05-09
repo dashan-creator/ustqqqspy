@@ -168,7 +168,6 @@ class ScannerPipeline:
             )
 
             llm_result = {"action": gate.auto_action, "risk_score": 1, "reason": gate.reason}
-            llm_skipped = not gate.needs_llm
 
             if gate.needs_llm:
                 logger.info("LLM GATE [%s]: %s → calling LLM", ticker, gate.reason)
@@ -253,10 +252,15 @@ class ScannerPipeline:
                             self.trader.positions[ticker] = {
                                 "quantity": quantity, "avg_price": price,
                                 "strategy": signal["strategy_name"],
+                                "stop_loss": signal["stop_loss"],
+                                "take_profit": signal["take_profit"],
+                                "entry_reason": signal.get("reason", ""),
+                                "atr": indicators.get("atr", price * 0.02),
                             }
                         self.trader.cash -= quantity * price
                 else:
                     logger.warning("IBKR order not filled: %s status=%s", ticker, order.get("status"))
+                    await persist_order(order)  # Persist pending order too
                     return {
                         "type": "signal_pending", "ticker": ticker,
                         "strategy": signal["strategy_name"],

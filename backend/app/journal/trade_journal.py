@@ -40,9 +40,9 @@ async def write_trade_note(trade: dict, llm_review: dict | None = None):
         pnl_pct = trade.get("pnl_pct", 0)
         ts = trade.get("timestamp", datetime.now(timezone.utc).isoformat())
 
-        # Filename: 2026-05-07_NVDA_breakout.md
-        date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        filename = f"{date_str}_{ticker}_{strategy}.md"
+        # Filename: 2026-05-07_143022_NVDA_breakout.md (unique per trade)
+        now = datetime.now(timezone.utc)
+        filename = f"{now.strftime('%Y-%m-%d_%H%M%S')}_{ticker}_{strategy}.md"
         filepath = JOURNAL_DIR / filename
 
         # Obsidian frontmatter
