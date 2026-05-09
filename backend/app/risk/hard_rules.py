@@ -43,10 +43,10 @@ class HardRiskChecker:
             return RiskCheckResult(False, f"仓位 {position_pct}% 超过上限 {self.max_single_position_pct}%", self.max_single_position_pct)
         if current_positions >= self.max_concurrent_positions:
             return RiskCheckResult(False, f"持仓数 {current_positions} 已达上限 {self.max_concurrent_positions}")
-        if daily_pnl_pct <= -self.max_daily_loss_pct:
-            return RiskCheckResult(False, f"当日亏损 {daily_pnl_pct*100:.2f}% 达到上限 {self.max_daily_loss_pct*100}%")
-        if weekly_pnl_pct <= -self.max_weekly_loss_pct:
-            return RiskCheckResult(False, f"本周亏损 {weekly_pnl_pct*100:.2f}% 达到上限 {self.max_weekly_loss_pct*100}%")
+        if daily_pnl_pct < -self.max_daily_loss_pct:
+            return RiskCheckResult(False, f"当日亏损 {daily_pnl_pct*100:.2f}% 超过上限 {self.max_daily_loss_pct*100}%")
+        if weekly_pnl_pct < -self.max_weekly_loss_pct:
+            return RiskCheckResult(False, f"本周亏损 {weekly_pnl_pct*100:.2f}% 超过上限 {self.max_weekly_loss_pct*100}%")
         if consecutive_losses >= self.consecutive_loss_limit:
             return RiskCheckResult(False, f"连续亏损 {consecutive_losses} 笔，达到上限 {self.consecutive_loss_limit}")
         if daily_volume_usd < self.min_volume_usd:

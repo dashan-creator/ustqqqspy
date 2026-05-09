@@ -78,17 +78,23 @@ class SmartGate:
         return GateDecision(False, "条件正常，跳过LLM审查", "approve")
 
     def _validate_trend(self, bars: pd.DataFrame, direction: str) -> bool:
-        """Check if recent bars support the signal direction."""
+        """Check if recent bars support the signal direction. Flat market is neutral (OK)."""
         closes = bars["close"].values[-5:]
         if len(closes) < 3:
             return True
 
-        # Count up/down bars in last 5
+        # Count up/down/flat bars in last 5
+        comparisons = len(closes) - 1
         up_bars = sum(1 for i in range(1, len(closes)) if closes[i] > closes[i-1])
-        down_bars = len(closes) - 1 - up_bars
+        down_bars = sum(1 for i in range(1, len(closes)) if closes[i] < closes[i-1])
+        flat_bars = comparisons - up_bars - down_bars
+
+        # Flat market (most bars unchanged) → neutral, allow
+        if flat_bars >= len(closes) // 2:
+            return True
 
         if direction == "long":
-            # At least 3/5 bars should be up for long
+            # At least 3/5 bars should be up for long, or final > start
             return up_bars >= 3 or closes[-1] > closes[0]
         else:
             return down_bars >= 3 or closes[-1] < closes[0]
