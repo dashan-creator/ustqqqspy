@@ -41,7 +41,7 @@ async def scan_job():
 
     logger.info("Running scan...")
     try:
-        events = await asyncio.wait_for(scanner_pipeline.run_scan(), timeout=60)
+        events = await asyncio.wait_for(scanner_pipeline.run_scan(), timeout=30)
     except asyncio.TimeoutError:
         logger.error("Scan timed out after 120s")
         return
