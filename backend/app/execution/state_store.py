@@ -5,6 +5,8 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
+from app.config import settings
+
 logger = logging.getLogger(__name__)
 
 STATE_FILE = Path(__file__).parent.parent.parent / "data" / "trader_state.json"
@@ -58,36 +60,60 @@ async def sync_with_db(trader) -> list[str]:
         actions.append(f"State from file: cash={trader.cash:.2f}, positions={len(trader.positions)}, trades={len(trader.trades)}")
         return actions
 
-    # State file empty — try to rebuild cash from DB orders
+    # State file empty — rebuild from DB orders
     try:
         from app.models.db import async_session
         from app.models.order import Order
+        from app.models.symbol import Symbol
         from sqlalchemy import select
 
         async with async_session() as session:
             result = await session.execute(
-                select(Order).where(Order.status == "filled").order_by(Order.id)
+                select(Order, Symbol.ticker)
+                .join(Symbol, Order.symbol_id == Symbol.id, isouter=True)
+                .where(Order.status == "filled")
+                .order_by(Order.id)
             )
-            db_orders = result.scalars().all()
+            db_orders = result.all()
 
             if db_orders:
-                db_cash = 100_000.0
-                for order in db_orders:
+                db_cash = settings.initial_cash
+                open_positions: dict[str, dict] = {}
+
+                for order, ticker in db_orders:
                     cost = order.quantity * (order.filled_price or 0)
                     if order.side == "buy":
                         db_cash -= cost
+                        if ticker:
+                            if ticker in open_positions:
+                                pos = open_positions[ticker]
+                                total_qty = pos["quantity"] + order.quantity
+                                pos["avg_price"] = (pos["avg_price"] * pos["quantity"] + (order.filled_price or 0) * order.quantity) / total_qty
+                                pos["quantity"] = total_qty
+                            else:
+                                open_positions[ticker] = {
+                                    "quantity": order.quantity,
+                                    "avg_price": order.filled_price or 0,
+                                    "strategy": "restored",
+                                }
                     elif order.side == "sell":
                         db_cash += cost
+                        if ticker and ticker in open_positions:
+                            open_positions[ticker]["quantity"] -= order.quantity
+                            if open_positions[ticker]["quantity"] <= 0:
+                                del open_positions[ticker]
+
                 trader.cash = db_cash
-                save_state(trader.cash, trader.positions, trader.trades)
-                actions.append(f"Rebuilt cash from DB: ${db_cash:.2f} ({len(db_orders)} orders)")
+                trader.positions = open_positions
+                save_state(trader.cash, trader.positions, trader.trades, risk_state=risk_state)
+                actions.append(f"Rebuilt from DB: cash=${db_cash:.2f}, positions={len(open_positions)}")
             else:
-                save_state(trader.cash, trader.positions, trader.trades)
+                save_state(trader.cash, trader.positions, trader.trades, risk_state=risk_state)
                 actions.append("Fresh start: no prior state found")
 
     except Exception as e:
         logger.warning("DB sync failed: %s", e)
-        save_state(trader.cash, trader.positions, trader.trades)
+        save_state(trader.cash, trader.positions, trader.trades, risk_state=risk_state)
         actions.append(f"DB sync failed: {e}")
 
     except Exception as e:

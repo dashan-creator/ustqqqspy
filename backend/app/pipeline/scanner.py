@@ -13,6 +13,9 @@ from app.risk import CircuitBreaker, HardRiskChecker, PositionManager
 from app.execution.paper_trader import PaperTrader
 from app.execution.order_manager import OrderManager
 from app.execution.persistence import persist_signal, persist_order
+from app.llm.smart_gate import smart_gate
+from app.llm.unified import pre_trade_analysis
+from app.monitor.health_check import check_health
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +71,6 @@ class ScannerPipeline:
             return events
 
         # Health check before scanning
-        from app.monitor.health_check import check_health
         health = await check_health(self.ibkr_broker)
         if not health.can_scan:
             logger.warning("System unhealthy, skipping scan: %s", health.to_dict())
@@ -154,7 +156,6 @@ class ScannerPipeline:
                 }
 
             # Smart Gate: decide if LLM is needed
-            from app.llm.smart_gate import smart_gate
             volume_ratio = indicators.get("volume_ratio", 1.0)
             if volume_ratio == 0:
                 volume_ratio = 1.0
@@ -175,7 +176,6 @@ class ScannerPipeline:
             if gate.needs_llm:
                 logger.info("LLM GATE [%s]: %s → calling LLM", ticker, gate.reason)
 
-                from app.llm.unified import pre_trade_analysis
                 news_summary = "; ".join(n.headline for n in news_items[:5]) or "无相关新闻"
                 pos_lines = []
                 for t, p in self.trader.positions.items():

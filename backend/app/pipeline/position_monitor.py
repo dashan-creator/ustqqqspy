@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 from app.execution.paper_trader import PaperTrader
 from app.execution.order_manager import OrderManager
-from app.execution.persistence import persist_trade
+from app.execution.persistence import persist_trade, persist_order
 from app.journal.trade_journal import write_trade_note
 from app.llm.unified import post_trade_review, position_review
 from app.market.data_service import market_data_service
@@ -132,6 +132,13 @@ class PositionMonitor:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         await persist_trade(trade_record)
+
+        # Persist sell order to DB
+        await persist_order({
+            "ticker": ticker, "side": "sell", "quantity": quantity,
+            "filled_price": actual_exit_price, "status": "filled",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        })
 
         # Update trader stats (paper/paper_fallback: trader.sell already appended; IBKR: we need to)
         if broker == "ibkr":
