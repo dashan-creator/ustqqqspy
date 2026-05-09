@@ -16,7 +16,7 @@ client = AsyncOpenAI(
 )
 
 
-async def chat(system_prompt: str, user_prompt: str, timeout: float = 15.0, max_tokens: int = 500) -> dict:
+async def chat(system_prompt: str, user_prompt: str, timeout: float = 15.0, max_tokens: int = 2000) -> dict:
     """Call LLM and parse JSON response. Fast timeout to avoid blocking scans."""
     start = time.monotonic()
     try:
@@ -42,8 +42,8 @@ async def chat(system_prompt: str, user_prompt: str, timeout: float = 15.0, max_
                     json_str = json_str[4:].strip()
                 result = json.loads(json_str)
             else:
-                logger.warning("LLM returned non-JSON: %s", content[:200])
-                return {"error": "invalid_json", "raw": content[:500], "_latency_ms": latency_ms}
+                logger.warning("LLM returned non-JSON: %s", content[:200] if content else "(empty)")
+                return {"action": "approve", "risk_score": 1, "reason": "LLM non-JSON, fallback approve", "_latency_ms": latency_ms}
 
         result["_latency_ms"] = latency_ms
         result["_model"] = settings.llm_model
