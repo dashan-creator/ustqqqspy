@@ -16,8 +16,8 @@ client = AsyncOpenAI(
 )
 
 
-async def chat(system_prompt: str, user_prompt: str, timeout: float = 30.0) -> dict:
-    """Call LLM and parse JSON response."""
+async def chat(system_prompt: str, user_prompt: str, timeout: float = 15.0, max_tokens: int = 500) -> dict:
+    """Call LLM and parse JSON response. Fast timeout to avoid blocking scans."""
     start = time.monotonic()
     try:
         response = await client.chat.completions.create(
@@ -27,6 +27,7 @@ async def chat(system_prompt: str, user_prompt: str, timeout: float = 30.0) -> d
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0.1,
+            max_tokens=max_tokens,
             timeout=timeout,
         )
         content = response.choices[0].message.content
