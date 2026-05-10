@@ -16,22 +16,47 @@ client = AsyncOpenAI(
 )
 
 
-async def chat(system_prompt: str, user_prompt: str, timeout: float = 15.0, max_tokens: int = 2000) -> dict:
+async def chat(
+    system_prompt: str,
+    user_prompt: str,
+    timeout: float = 15.0,
+    max_tokens: int = 2000,
+    json_mode: bool = True,
+) -> dict:
     """Call LLM and parse JSON response. Fast timeout to avoid blocking scans."""
     start = time.monotonic()
     try:
-        response = await client.chat.completions.create(
-            model=settings.llm_model,
-            messages=[
+        request = {
+            "model": settings.llm_model,
+            "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.1,
-            max_tokens=max_tokens,
-            timeout=timeout,
-        )
+            "temperature": 0.1,
+            "max_tokens": max_tokens,
+            "timeout": timeout,
+        }
+        if json_mode:
+            request["response_format"] = {"type": "json_object"}
+
+        try:
+            response = await client.chat.completions.create(**request)
+        except Exception as e:
+            if not json_mode or "response_format" not in str(e).lower():
+                raise
+            logger.warning("LLM JSON mode unsupported, retrying without response_format: %s", e)
+            request.pop("response_format", None)
+            response = await client.chat.completions.create(**request)
+
         content = response.choices[0].message.content
         latency_ms = int((time.monotonic() - start) * 1000)
+
+        if not json_mode:
+            return {
+                "content": content or "",
+                "_latency_ms": latency_ms,
+                "_model": settings.llm_model,
+            }
 
         try:
             result = json.loads(content)
@@ -43,7 +68,13 @@ async def chat(system_prompt: str, user_prompt: str, timeout: float = 15.0, max_
                 result = json.loads(json_str)
             else:
                 logger.warning("LLM returned non-JSON: %s", content[:200] if content else "(empty)")
-                return {"action": "approve", "risk_score": 1, "reason": "LLM non-JSON, fallback approve", "_latency_ms": latency_ms}
+                return {
+                    "error": "invalid_json",
+                    "action": "reject",
+                    "risk_score": 10,
+                    "reason": "LLM returned invalid JSON; fail closed",
+                    "_latency_ms": latency_ms,
+                }
 
         result["_latency_ms"] = latency_ms
         result["_model"] = settings.llm_model
@@ -52,4 +83,10 @@ async def chat(system_prompt: str, user_prompt: str, timeout: float = 15.0, max_
     except Exception as e:
         latency_ms = int((time.monotonic() - start) * 1000)
         logger.error("LLM call failed: %s", e)
-        return {"error": str(e), "_latency_ms": latency_ms}
+        return {
+            "error": str(e),
+            "action": "reject",
+            "risk_score": 10,
+            "reason": "LLM call failed; fail closed",
+            "_latency_ms": latency_ms,
+        }

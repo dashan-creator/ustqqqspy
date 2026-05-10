@@ -172,9 +172,14 @@ async def position_review(
 新闻:
 {news_summary if news_summary else "无重大新闻"}"""
 
-    result = await chat(POSITION_REVIEW_PROMPT, user_prompt, timeout=30.0)
+    result = await chat(
+        POSITION_REVIEW_PROMPT,
+        user_prompt,
+        timeout=15.0,
+        max_tokens=1200,
+        json_mode=False,
+    )
 
-    # 如果 LLM 返回 JSON，提取内容；否则直接返回
     if isinstance(result, dict):
-        return result.get("content", result.get("reason", str(result)))
+        return result.get("content", "") or result.get("reason", str(result))
     return str(result)
