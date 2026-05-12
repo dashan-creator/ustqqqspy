@@ -46,6 +46,27 @@ cd backend
 pytest
 ```
 
+SPY/TQQQ stability backtest:
+
+```bash
+cd backend
+python scripts/backtest_spy_tqqq_cycle.py --mode allocation --output backtest_spy_tqqq_cycle_results.json
+```
+
+Latest checked result, using Yahoo daily data from 2011-01-03 to 2026-05-11 with 1 bp fees,
+2 bp slippage, and 2% annual cash yield:
+
+| Case | Total Return | CAGR | Max Drawdown | Sharpe |
+| --- | ---: | ---: | ---: | ---: |
+| SPY/TQQQ allocation | 712.56% | 14.62% | -27.12% | 0.82 |
+| Buy-and-hold SPY | 662.73% | 14.15% | -33.72% | 0.86 |
+| Buy-and-hold TQQQ | 19968.91% | 41.25% | -81.66% | 0.87 |
+
+The stability gate passes only when the allocation beats buy-and-hold SPY, has lower drawdown
+than SPY and TQQQ, Sharpe is at least 0.80, and at least 80% of tested market regimes are profitable.
+The 2022 inflation-bear slice was still negative (-14.66%), so this is a backtested risk-managed
+allocation, not a profit guarantee.
+
 Frontend:
 
 ```bash
