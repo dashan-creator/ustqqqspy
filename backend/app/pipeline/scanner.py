@@ -77,7 +77,7 @@ class ScannerPipeline:
             events.append({"type": "scan_skipped", "reason": f"unhealthy: {health.to_dict()}"})
             return events
 
-        market = await market_data_service.get_market_context("QQQ")
+        market = await market_data_service.get_market_context("SPY")
 
         for ticker in settings.symbol_list:
             try:
@@ -190,7 +190,11 @@ class ScannerPipeline:
                     stop_loss=signal["stop_loss"],
                     take_profit=signal["take_profit"],
                     position_pct=settings.max_single_position_pct,
-                    market_state=f"QQQ {market['change_pct']:+.2f}%",
+                    market_state=(
+                        f"SPY {market['change_pct']:+.2f}%, "
+                        f"VIX {market.get('vix', 0):.1f}, "
+                        f"VIX curve {market.get('vix_term_structure', 'unknown')}"
+                    ),
                     rsi=indicators.get("rsi", 50),
                     atr=indicators.get("atr", 0),
                     volume_ratio=volume_ratio,

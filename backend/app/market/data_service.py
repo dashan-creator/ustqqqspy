@@ -6,6 +6,7 @@ import time
 import numpy as np
 import pandas as pd
 
+from app.config import settings
 from app.market.indicators import atr, rsi, vwap
 from app.market.providers.base import MarketDataProvider
 
@@ -97,13 +98,30 @@ class MarketDataService:
             "volume_ratio": round(vol_ratio, 2),
         }
 
-    async def get_market_context(self, benchmark: str = "QQQ") -> dict:
+    async def get_market_context(self, benchmark: str = "SPY") -> dict:
         quote = await self.get_quote(benchmark)
+        vix_quote = await self.get_quote("^VIX")
+        vix3m_quote = await self.get_quote("^VIX3M")
+        vvix_quote = await self.get_quote("^VVIX")
+        move_quote = await self.get_quote("^MOVE")
+
+        vix = float(vix_quote.get("price", 0) or 20.0)
+        vix3m = float(vix3m_quote.get("price", 0) or 22.0)
+        vvix = float(vvix_quote.get("price", 0) or 95.0)
+        move = float(move_quote.get("price", 0) or 120.0)
+
         return {
             "benchmark": benchmark,
             "price": quote["price"],
             "change_pct": quote["change_pct"],
-            "is_bullish": quote["change_pct"] > -0.7,
+            "is_bullish": quote["change_pct"] > -0.7 and vix < 28,
+            "vix": vix,
+            "vix3m": vix3m,
+            "vvix": vvix,
+            "move": move,
+            "vix_term_structure": "backwardation" if vix3m > 0 and vix / vix3m >= 1 else "contango",
+            "fed_event_risk": settings.fed_event_risk,
+            "fomc_days_to_event": settings.fomc_days_to_event,
         }
 
 

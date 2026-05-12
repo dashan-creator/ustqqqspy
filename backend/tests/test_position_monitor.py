@@ -37,6 +37,7 @@ async def test_stop_loss_triggers(setup):
     trader, om, monitor = setup
     with patch.object(monitor, "_get_current_price", return_value=94.0), \
          patch("app.pipeline.position_monitor.persist_trade", new_callable=AsyncMock), \
+         patch("app.pipeline.position_monitor.persist_order", new_callable=AsyncMock), \
          patch("app.pipeline.position_monitor.post_trade_review", new_callable=AsyncMock, return_value={}), \
          patch("app.pipeline.position_monitor.write_trade_note", new_callable=AsyncMock):
         events = await monitor.check_positions()
@@ -52,6 +53,7 @@ async def test_take_profit_triggers(setup):
     trader, om, monitor = setup
     with patch.object(monitor, "_get_current_price", return_value=125.0), \
          patch("app.pipeline.position_monitor.persist_trade", new_callable=AsyncMock), \
+         patch("app.pipeline.position_monitor.persist_order", new_callable=AsyncMock), \
          patch("app.pipeline.position_monitor.post_trade_review", new_callable=AsyncMock, return_value={}), \
          patch("app.pipeline.position_monitor.write_trade_note", new_callable=AsyncMock):
         events = await monitor.check_positions()
@@ -76,6 +78,7 @@ async def test_trailing_stop(setup):
     # Price drops significantly
     with patch.object(monitor, "_get_current_price", return_value=124.0), \
          patch("app.pipeline.position_monitor.persist_trade", new_callable=AsyncMock), \
+         patch("app.pipeline.position_monitor.persist_order", new_callable=AsyncMock), \
          patch("app.pipeline.position_monitor.post_trade_review", new_callable=AsyncMock, return_value={}), \
          patch("app.pipeline.position_monitor.write_trade_note", new_callable=AsyncMock):
         events = await monitor.check_positions()
@@ -88,6 +91,7 @@ async def test_consecutive_losses_increments(setup):
     trader, om, monitor = setup
     with patch.object(monitor, "_get_current_price", return_value=90.0), \
          patch("app.pipeline.position_monitor.persist_trade", new_callable=AsyncMock), \
+         patch("app.pipeline.position_monitor.persist_order", new_callable=AsyncMock), \
          patch("app.pipeline.position_monitor.post_trade_review", new_callable=AsyncMock, return_value={}), \
          patch("app.pipeline.position_monitor.write_trade_note", new_callable=AsyncMock):
         await monitor.check_positions()
@@ -100,6 +104,7 @@ async def test_consecutive_losses_resets_on_win(setup):
     trader.consecutive_losses = 2
     with patch.object(monitor, "_get_current_price", return_value=125.0), \
          patch("app.pipeline.position_monitor.persist_trade", new_callable=AsyncMock), \
+         patch("app.pipeline.position_monitor.persist_order", new_callable=AsyncMock), \
          patch("app.pipeline.position_monitor.post_trade_review", new_callable=AsyncMock, return_value={}), \
          patch("app.pipeline.position_monitor.write_trade_note", new_callable=AsyncMock):
         await monitor.check_positions()

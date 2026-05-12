@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Database
-    database_url: str = "sqlite+aiosqlite:///./usstock.db"
+    database_url: str = "sqlite+aiosqlite:///./ustqqqspy.db"
     # Redis
     redis_url: str = "redis://localhost:6379/0"
     # LLM
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     polygon_api_key: str = ""
     news_cache_ttl_seconds: int = 300
     # Trading
-    symbols: str = "SPY,QQQ,AAPL,MSFT,NVDA,TSLA,META,AMZN,GOOGL,AMD"
+    symbols: str = "SPY,TQQQ"
     scan_interval_minutes: int = 15
     max_daily_loss_pct: float = 0.01
     max_weekly_loss_pct: float = 0.04
@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     max_single_position_pct: float = 2.0
     consecutive_loss_limit: int = 3
     initial_cash: float = 100_000.0
+    fed_event_risk: bool = False
+    fomc_days_to_event: int | None = None
     # App
     admin_api_key: str = ""
     debug: bool = False
