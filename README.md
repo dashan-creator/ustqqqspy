@@ -85,8 +85,18 @@ Continuous full-run regime slices for the current default:
 | 2022 inflation bear | 6.01% | -6.55% |
 | 2023-present AI/liquidity bull | 100.26% | -17.89% |
 
-The default allocation uses SPY/TQQQ for risk-on participation, UUP/DBC for risk-off exposure,
-and BIL/UUP during detected inflation-stress regimes driven by MOVE, trend, and drawdown filters.
+Default allocation policy:
+
+| State | Trigger | Allocation intent | Default target |
+| --- | --- | --- | --- |
+| Risk-on attack | SPY trend is above the 100/200-day filters, TQQQ 180-day momentum is positive, and VIX is controlled | Use TQQQ for upside capture with SPY as ballast | 65% SPY / 35% TQQQ |
+| Repair | Long trend is intact, panic is absent, and momentum is recovering | Rebuild exposure without full leverage | 80% SPY / 20% TQQQ |
+| Normal defense | Trend is not strong enough for attack, but inflation/panic filters are not active | Stay defensive inside equities | 60% SPY |
+| Risk-off | Trend, VIX/VVIX, VIX curve, or drawdown filters show broad stress | Leave equity beta and use defensive diversifiers | 40% UUP / 25% DBC |
+| Inflation stress | MOVE is elevated, SPY is below the 200-day filter, and drawdown exceeds the inflation threshold | Defend against rate/inflation shocks | 50% BIL / 25% UUP |
+
+In short: TQQQ is the attack sleeve, SPY is the normal equity defense sleeve, and BIL/UUP plus
+UUP/DBC are reserved for regimes where SPY itself has not historically been defensive enough.
 
 Robustness screen: a fast array-based checker perturbs core parameters and execution assumptions.
 The latest run passed 12 of 18 cases. Nearby trend, momentum, MOVE, inflation-drawdown, TQQQ-weight,
