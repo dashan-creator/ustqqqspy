@@ -57,6 +57,8 @@ class BacktestConfig:
     cash_yield_pct: float = 2.0
     hedge_symbol: str = "SH"
     hedge_weight: float = 0.0
+    risk_off_symbols: str = ""
+    risk_off_weights: str = ""
 
 
 def _normalize_ohlcv(df: pd.DataFrame) -> pd.DataFrame:
@@ -64,8 +66,31 @@ def _normalize_ohlcv(df: pd.DataFrame) -> pd.DataFrame:
     return df[["open", "high", "low", "close", "volume"]].dropna()
 
 
-def download_history(start: str, end: str | None) -> dict[str, pd.DataFrame]:
+def parse_weight_map(symbols: str, weights: str) -> dict[str, float]:
+    symbol_list = [s.strip().upper() for s in symbols.split(",") if s.strip()]
+    weight_list = [float(w.strip()) for w in weights.split(",") if w.strip()]
+    if not symbol_list:
+        return {}
+    if len(symbol_list) != len(weight_list):
+        raise ValueError("risk-off symbols and weights must have the same length")
+    total = sum(weight_list)
+    if total > 1.0 + 1e-9:
+        raise ValueError("risk-off weights cannot exceed 1.0")
+    return dict(zip(symbol_list, weight_list))
+
+
+def strategy_universe(cfg: BacktestConfig) -> list[str]:
+    symbols = ["SPY", "TQQQ"]
+    if cfg.hedge_symbol:
+        symbols.append(cfg.hedge_symbol.upper())
+    symbols.extend(parse_weight_map(cfg.risk_off_symbols, cfg.risk_off_weights).keys())
+    return list(dict.fromkeys(symbols))
+
+
+def download_history(start: str, end: str | None, extra_tickers: list[str] | None = None) -> dict[str, pd.DataFrame]:
     tickers = ["SPY", "TQQQ", "SH", "^VIX", "^VIX3M", "^VVIX", "^MOVE"]
+    tickers.extend(extra_tickers or [])
+    tickers = list(dict.fromkeys(tickers))
     cache_dir = Path("data/backtest_cache")
     cache_dir.mkdir(parents=True, exist_ok=True)
     cached: dict[str, pd.DataFrame] = {}
@@ -285,10 +310,12 @@ def run_backtest(data: dict[str, pd.DataFrame], cfg: BacktestConfig, strategy: S
 
 
 def target_weights(data: dict[str, pd.DataFrame], date: pd.Timestamp, cfg: BacktestConfig) -> dict[str, float]:
+    universe = strategy_universe(cfg)
+    zero = {ticker: 0.0 for ticker in universe}
     spy = data["SPY"].loc[data["SPY"].index <= date]
     tqqq = data["TQQQ"].loc[data["TQQQ"].index <= date]
     if len(spy) <= cfg.sma_slow or len(tqqq) <= cfg.momentum_days:
-        return {"SPY": 0.0, "TQQQ": 0.0, cfg.hedge_symbol: 0.0}
+        return zero
 
     spy_close = spy["close"]
     tqqq_close = tqqq["close"]
@@ -314,14 +341,28 @@ def target_weights(data: dict[str, pd.DataFrame], date: pd.Timestamp, cfg: Backt
     repair = long_trend and not panic and tqqq_momentum > 0.03 and vix <= cfg.vix_risk_off
     hedge_ready = cfg.hedge_symbol in data and len(data[cfg.hedge_symbol].loc[data[cfg.hedge_symbol].index <= date]) > 0
     hedge_weight = cfg.hedge_weight if hedge_ready and (panic or not long_trend) else 0.0
+    risk_off_weights = {
+        ticker: weight
+        for ticker, weight in parse_weight_map(cfg.risk_off_symbols, cfg.risk_off_weights).items()
+        if ticker in data and len(data[ticker].loc[data[ticker].index <= date]) > 0
+    }
 
     if panic or not long_trend:
-        return {"SPY": 0.0, "TQQQ": 0.0, cfg.hedge_symbol: hedge_weight}
+        weights = dict(zero)
+        weights[cfg.hedge_symbol] = hedge_weight
+        weights.update(risk_off_weights)
+        return weights
     if risk_on:
-        return {"SPY": max(0.0, 1.0 - cfg.tqqq_weight), "TQQQ": cfg.tqqq_weight, cfg.hedge_symbol: 0.0}
+        weights = dict(zero)
+        weights.update({"SPY": max(0.0, 1.0 - cfg.tqqq_weight), "TQQQ": cfg.tqqq_weight})
+        return weights
     if repair:
-        return {"SPY": cfg.repair_spy_weight, "TQQQ": cfg.repair_tqqq_weight, cfg.hedge_symbol: 0.0}
-    return {"SPY": cfg.defensive_spy_weight, "TQQQ": 0.0, cfg.hedge_symbol: 0.0}
+        weights = dict(zero)
+        weights.update({"SPY": cfg.repair_spy_weight, "TQQQ": cfg.repair_tqqq_weight})
+        return weights
+    weights = dict(zero)
+    weights["SPY"] = cfg.defensive_spy_weight
+    return weights
 
 
 def run_allocation_backtest(data: dict[str, pd.DataFrame], cfg: BacktestConfig) -> dict:
@@ -333,7 +374,7 @@ def run_allocation_backtest(data: dict[str, pd.DataFrame], cfg: BacktestConfig) 
         raise RuntimeError("no overlapping SPY/TQQQ dates for allocation backtest")
 
     cash = cfg.initial_cash
-    shares = {"SPY": 0.0, "TQQQ": 0.0, cfg.hedge_symbol: 0.0}
+    shares = {ticker: 0.0 for ticker in strategy_universe(cfg)}
     trades: list[dict] = []
     equity_curve: list[dict] = []
     current_weights = {ticker: 0.0 for ticker in shares}
@@ -619,6 +660,8 @@ def main() -> None:
     parser.add_argument("--cash-yield-pct", type=float, default=2.0)
     parser.add_argument("--hedge-symbol", default="SH")
     parser.add_argument("--hedge-weight", type=float, default=0.0)
+    parser.add_argument("--risk-off-symbols", default="")
+    parser.add_argument("--risk-off-weights", default="")
     parser.add_argument("--include-equity", action="store_true")
     args = parser.parse_args()
 
@@ -641,8 +684,10 @@ def main() -> None:
         cash_yield_pct=args.cash_yield_pct,
         hedge_symbol=args.hedge_symbol,
         hedge_weight=args.hedge_weight,
+        risk_off_symbols=args.risk_off_symbols,
+        risk_off_weights=args.risk_off_weights,
     )
-    data = download_history(cfg.start, cfg.end)
+    data = download_history(cfg.start, cfg.end, extra_tickers=strategy_universe(cfg))
     strategy = SpyTqqqCycleStrategy()
     if args.mode == "allocation":
         strategy_result = run_allocation_backtest(data, cfg)
