@@ -53,6 +53,13 @@ cd backend
 python scripts/backtest_spy_tqqq_cycle.py --mode allocation --output backtest_spy_tqqq_cycle_results.json
 ```
 
+SPY/TQQQ robustness stress test:
+
+```bash
+cd backend
+python scripts/stress_test_spy_tqqq_cycle.py --output stress_spy_tqqq_cycle_results.json
+```
+
 Latest checked result, using Yahoo daily data from 2011-01-03 to 2026-05-11 with 1 bp fees,
 2 bp slippage, and 2% annual cash yield:
 
@@ -80,6 +87,12 @@ Continuous full-run regime slices for the current default:
 
 The default allocation uses SPY/TQQQ for risk-on participation, UUP/DBC for risk-off exposure,
 and BIL/UUP during detected inflation-stress regimes driven by MOVE, trend, and drawdown filters.
+
+Robustness screen: a fast array-based checker perturbs core parameters and execution assumptions.
+The latest run passed 12 of 18 cases. Nearby trend, momentum, MOVE, inflation-drawdown, TQQQ-weight,
+and zero-cash-yield scenarios mostly held up. Failures concentrated in high execution friction
+or delayed execution: 5-10 bp slippage, 5 bp fees, and one-day execution delay. Treat the stress
+script as a fast screen; the official performance and gates come from `backtest_spy_tqqq_cycle.py`.
 
 Frontend:
 

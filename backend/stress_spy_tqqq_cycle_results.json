@@ -1,0 +1,4875 @@
+{
+  "description": "Parameter perturbation and execution pressure checks for the SPY/TQQQ allocation.",
+  "base_config": {
+    "initial_cash": 100000.0,
+    "spy_position_pct": 55.0,
+    "tqqq_position_pct": 35.0,
+    "max_hold_days": 25,
+    "fee_bps": 1.0,
+    "slippage_bps": 2.0,
+    "start": "2011-01-01",
+    "end": null,
+    "sma_fast": 100,
+    "sma_slow": 200,
+    "recent_high_days": 42,
+    "momentum_days": 180,
+    "risk_on_momentum_min": 0.0,
+    "repair_momentum_min": 0.03,
+    "vix_risk_on": 24.0,
+    "vix_risk_off": 28.0,
+    "repair_vix_max": 22.0,
+    "vix_backwardation_ratio": 1.0,
+    "vix_backwardation_level": 28.0,
+    "vvix_risk_off": 115.0,
+    "move_inflation_risk": 115.0,
+    "inflation_drawdown_pct": 10.0,
+    "inflation_sma": 200,
+    "tqqq_weight": 0.35,
+    "repair_tqqq_weight": 0.2,
+    "repair_spy_weight": 0.8,
+    "defensive_spy_weight": 0.6,
+    "drawdown_guard_pct": 20.0,
+    "cash_yield_pct": 2.0,
+    "hedge_symbol": "SH",
+    "hedge_weight": 0.0,
+    "risk_off_symbols": "UUP,DBC",
+    "risk_off_weights": "0.4,0.25",
+    "inflation_off_symbols": "BIL,UUP",
+    "inflation_off_weights": "0.5,0.25"
+  },
+  "spy_benchmark": {
+    "start": "2011-01-03",
+    "end": "2026-05-11",
+    "total_return_pct": 662.73,
+    "cagr_pct": 14.15,
+    "max_drawdown_pct": -33.72,
+    "sharpe": 0.86
+  },
+  "summary": {
+    "total_cases": 18,
+    "passed_cases": 12,
+    "failed_cases": 6
+  },
+  "cases": [
+    {
+      "case": "baseline_fast_engine",
+      "passed": true,
+      "reasons": [],
+      "overrides": {},
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 757.03,
+        "cagr_pct": 15.02,
+        "max_drawdown_pct": -26.42,
+        "sharpe": 0.88
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 103.05,
+          "cagr_pct": 15.25,
+          "max_drawdown_pct": -14.57,
+          "sharpe": 0.89,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 69.46,
+          "cagr_pct": 14.14,
+          "max_drawdown_pct": -26.42,
+          "sharpe": 0.89,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 17.81,
+          "cagr_pct": 8.56,
+          "max_drawdown_pct": -17.62,
+          "sharpe": 0.59,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 3.44,
+          "cagr_pct": 3.48,
+          "max_drawdown_pct": -6.55,
+          "sharpe": 0.41,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 97.59,
+          "cagr_pct": 22.54,
+          "max_drawdown_pct": -17.55,
+          "sharpe": 1.07,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 389
+    },
+    {
+      "case": "sma_fast_down",
+      "passed": true,
+      "reasons": [],
+      "overrides": {
+        "sma_fast": 80
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 726.78,
+        "cagr_pct": 14.75,
+        "max_drawdown_pct": -26.44,
+        "sharpe": 0.88
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 95.84,
+          "cagr_pct": 14.41,
+          "max_drawdown_pct": -14.23,
+          "sharpe": 0.86,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 67.25,
+          "cagr_pct": 13.76,
+          "max_drawdown_pct": -26.44,
+          "sharpe": 0.88,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 17.56,
+          "cagr_pct": 8.44,
+          "max_drawdown_pct": -17.05,
+          "sharpe": 0.58,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 3.44,
+          "cagr_pct": 3.48,
+          "max_drawdown_pct": -6.55,
+          "sharpe": 0.41,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 100.67,
+          "cagr_pct": 23.1,
+          "max_drawdown_pct": -16.7,
+          "sharpe": 1.09,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-06",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-06-24",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-06-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-21",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-22",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-09-04",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-10-08",
+          "state": "repair"
+        },
+        {
+          "date": "2013-10-10",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-01-29",
+          "state": "repair"
+        },
+        {
+          "date": "2014-01-30",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-01-31",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-07",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-15",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-08-06",
+          "state": "repair"
+        },
+        {
+          "date": "2014-08-08",
+          "state": "risk_on"
+        }
+      ],
+      "transition_count": 411
+    },
+    {
+      "case": "sma_fast_up",
+      "passed": true,
+      "reasons": [],
+      "overrides": {
+        "sma_fast": 120
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 726.09,
+        "cagr_pct": 14.75,
+        "max_drawdown_pct": -26.89,
+        "sharpe": 0.87
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 99.04,
+          "cagr_pct": 14.79,
+          "max_drawdown_pct": -16.86,
+          "sharpe": 0.87,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 67.25,
+          "cagr_pct": 13.76,
+          "max_drawdown_pct": -26.89,
+          "sharpe": 0.85,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 18.21,
+          "cagr_pct": 8.74,
+          "max_drawdown_pct": -17.62,
+          "sharpe": 0.6,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 3.44,
+          "cagr_pct": 3.48,
+          "max_drawdown_pct": -6.55,
+          "sharpe": 0.41,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 96.19,
+          "cagr_pct": 22.27,
+          "max_drawdown_pct": -17.55,
+          "sharpe": 1.05,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-17",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-15",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-10",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-04",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        },
+        {
+          "date": "2014-10-20",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-21",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-22",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-12-10",
+          "state": "risk_off"
+        },
+        {
+          "date": "2014-12-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2015-01-05",
+          "state": "risk_off"
+        },
+        {
+          "date": "2015-01-07",
+          "state": "risk_on"
+        }
+      ],
+      "transition_count": 390
+    },
+    {
+      "case": "sma_slow_down",
+      "passed": false,
+      "reasons": [
+        "inflation_bear not profitable"
+      ],
+      "overrides": {
+        "sma_slow": 180
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 671.59,
+        "cagr_pct": 14.24,
+        "max_drawdown_pct": -25.32,
+        "sharpe": 0.85
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 96.63,
+          "cagr_pct": 14.51,
+          "max_drawdown_pct": -15.88,
+          "sharpe": 0.86,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 69.62,
+          "cagr_pct": 14.16,
+          "max_drawdown_pct": -25.32,
+          "sharpe": 0.89,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 17.81,
+          "cagr_pct": 8.56,
+          "max_drawdown_pct": -17.62,
+          "sharpe": 0.59,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": -0.01,
+          "cagr_pct": -0.01,
+          "max_drawdown_pct": -6.55,
+          "sharpe": 0.05,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 89.87,
+          "cagr_pct": 21.09,
+          "max_drawdown_pct": -17.55,
+          "sharpe": 1.01,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-01",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-06-06",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-13",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        }
+      ],
+      "transition_count": 393
+    },
+    {
+      "case": "sma_slow_up",
+      "passed": true,
+      "reasons": [],
+      "overrides": {
+        "sma_slow": 220
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 692.6,
+        "cagr_pct": 14.44,
+        "max_drawdown_pct": -30.23,
+        "sharpe": 0.85
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 105.54,
+          "cagr_pct": 15.53,
+          "max_drawdown_pct": -14.57,
+          "sharpe": 0.91,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 60.69,
+          "cagr_pct": 12.63,
+          "max_drawdown_pct": -30.23,
+          "sharpe": 0.8,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 17.81,
+          "cagr_pct": 8.56,
+          "max_drawdown_pct": -17.62,
+          "sharpe": 0.59,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 2.45,
+          "cagr_pct": 2.48,
+          "max_drawdown_pct": -6.55,
+          "sharpe": 0.31,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 92.21,
+          "cagr_pct": 21.53,
+          "max_drawdown_pct": -19.35,
+          "sharpe": 1.02,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-11-15",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-28",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-29",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        },
+        {
+          "date": "2014-10-20",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-24",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-12-10",
+          "state": "risk_off"
+        },
+        {
+          "date": "2014-12-17",
+          "state": "risk_on"
+        }
+      ],
+      "transition_count": 390
+    },
+    {
+      "case": "momentum_down",
+      "passed": true,
+      "reasons": [],
+      "overrides": {
+        "momentum_days": 150
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 815.18,
+        "cagr_pct": 15.51,
+        "max_drawdown_pct": -20.82,
+        "sharpe": 0.91
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 111.46,
+          "cagr_pct": 16.19,
+          "max_drawdown_pct": -14.57,
+          "sharpe": 0.95,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 83.79,
+          "cagr_pct": 16.48,
+          "max_drawdown_pct": -20.82,
+          "sharpe": 1.0,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 17.81,
+          "cagr_pct": 8.56,
+          "max_drawdown_pct": -17.62,
+          "sharpe": 0.59,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 6.01,
+          "cagr_pct": 6.08,
+          "max_drawdown_pct": -6.55,
+          "sharpe": 0.72,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 82.28,
+          "cagr_pct": 19.62,
+          "max_drawdown_pct": -19.92,
+          "sharpe": 0.95,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-01-11",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-10-18",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-12-11",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-12-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-12-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-12-28",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-12-31",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-04-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-04-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-04-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-04-30",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-05-01",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-05-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        }
+      ],
+      "transition_count": 400
+    },
+    {
+      "case": "momentum_up",
+      "passed": true,
+      "reasons": [],
+      "overrides": {
+        "momentum_days": 210
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 883.49,
+        "cagr_pct": 16.06,
+        "max_drawdown_pct": -23.57,
+        "sharpe": 0.94
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 111.78,
+          "cagr_pct": 16.22,
+          "max_drawdown_pct": -15.44,
+          "sharpe": 0.94,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 82.05,
+          "cagr_pct": 16.21,
+          "max_drawdown_pct": -23.57,
+          "sharpe": 1.03,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 17.81,
+          "cagr_pct": 8.56,
+          "max_drawdown_pct": -17.62,
+          "sharpe": 0.59,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 6.42,
+          "cagr_pct": 6.49,
+          "max_drawdown_pct": -6.55,
+          "sharpe": 0.65,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 96.7,
+          "cagr_pct": 22.37,
+          "max_drawdown_pct": -19.76,
+          "sharpe": 1.06,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-11-01",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-01-12",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-25",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "repair"
+        },
+        {
+          "date": "2012-11-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-27",
+          "state": "repair"
+        },
+        {
+          "date": "2012-11-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-12-26",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-02-11",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-02-13",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-02-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-02-20",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-02-22",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-02-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-03-04",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        }
+      ],
+      "transition_count": 389
+    },
+    {
+      "case": "move_threshold_down",
+      "passed": true,
+      "reasons": [],
+      "overrides": {
+        "move_inflation_risk": 105.0
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 759.22,
+        "cagr_pct": 15.04,
+        "max_drawdown_pct": -26.42,
+        "sharpe": 0.89
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 103.05,
+          "cagr_pct": 15.25,
+          "max_drawdown_pct": -14.57,
+          "sharpe": 0.89,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 69.46,
+          "cagr_pct": 14.14,
+          "max_drawdown_pct": -26.42,
+          "sharpe": 0.89,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 17.67,
+          "cagr_pct": 8.49,
+          "max_drawdown_pct": -17.62,
+          "sharpe": 0.58,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 2.8,
+          "cagr_pct": 2.84,
+          "max_drawdown_pct": -6.55,
+          "sharpe": 0.35,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 99.57,
+          "cagr_pct": 22.9,
+          "max_drawdown_pct": -16.73,
+          "sharpe": 1.08,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 389
+    },
+    {
+      "case": "move_threshold_up",
+      "passed": true,
+      "reasons": [],
+      "overrides": {
+        "move_inflation_risk": 125.0
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 753.45,
+        "cagr_pct": 14.99,
+        "max_drawdown_pct": -26.42,
+        "sharpe": 0.88
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 103.05,
+          "cagr_pct": 15.25,
+          "max_drawdown_pct": -14.57,
+          "sharpe": 0.89,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 69.46,
+          "cagr_pct": 14.14,
+          "max_drawdown_pct": -26.42,
+          "sharpe": 0.89,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 18.16,
+          "cagr_pct": 8.72,
+          "max_drawdown_pct": -17.62,
+          "sharpe": 0.59,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 2.16,
+          "cagr_pct": 2.19,
+          "max_drawdown_pct": -6.55,
+          "sharpe": 0.28,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 98.65,
+          "cagr_pct": 22.73,
+          "max_drawdown_pct": -17.11,
+          "sharpe": 1.07,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 387
+    },
+    {
+      "case": "inflation_drawdown_down",
+      "passed": true,
+      "reasons": [],
+      "overrides": {
+        "inflation_drawdown_pct": 8.0
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 730.76,
+        "cagr_pct": 14.79,
+        "max_drawdown_pct": -26.42,
+        "sharpe": 0.87
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 103.05,
+          "cagr_pct": 15.25,
+          "max_drawdown_pct": -14.57,
+          "sharpe": 0.89,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 69.46,
+          "cagr_pct": 14.14,
+          "max_drawdown_pct": -26.42,
+          "sharpe": 0.89,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 17.81,
+          "cagr_pct": 8.56,
+          "max_drawdown_pct": -17.62,
+          "sharpe": 0.59,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 0.16,
+          "cagr_pct": 0.16,
+          "max_drawdown_pct": -6.55,
+          "sharpe": 0.06,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 97.83,
+          "cagr_pct": 22.58,
+          "max_drawdown_pct": -17.55,
+          "sharpe": 1.07,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 403
+    },
+    {
+      "case": "inflation_drawdown_up",
+      "passed": false,
+      "reasons": [
+        "inflation_bear not profitable"
+      ],
+      "overrides": {
+        "inflation_drawdown_pct": 12.0
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 712.91,
+        "cagr_pct": 14.63,
+        "max_drawdown_pct": -26.42,
+        "sharpe": 0.86
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 103.05,
+          "cagr_pct": 15.25,
+          "max_drawdown_pct": -14.57,
+          "sharpe": 0.89,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 69.46,
+          "cagr_pct": 14.14,
+          "max_drawdown_pct": -26.42,
+          "sharpe": 0.89,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 17.81,
+          "cagr_pct": 8.56,
+          "max_drawdown_pct": -17.62,
+          "sharpe": 0.59,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": -1.26,
+          "cagr_pct": -1.27,
+          "max_drawdown_pct": -6.55,
+          "sharpe": -0.08,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 96.34,
+          "cagr_pct": 22.3,
+          "max_drawdown_pct": -18.07,
+          "sharpe": 1.06,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 391
+    },
+    {
+      "case": "tqqq_weight_down",
+      "passed": true,
+      "reasons": [],
+      "overrides": {
+        "tqqq_weight": 0.3
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 679.84,
+        "cagr_pct": 14.32,
+        "max_drawdown_pct": -24.25,
+        "sharpe": 0.9
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 94.53,
+          "cagr_pct": 14.26,
+          "max_drawdown_pct": -13.86,
+          "sharpe": 0.89,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 66.51,
+          "cagr_pct": 13.64,
+          "max_drawdown_pct": -24.25,
+          "sharpe": 0.91,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 16.97,
+          "cagr_pct": 8.17,
+          "max_drawdown_pct": -16.39,
+          "sharpe": 0.59,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 4.39,
+          "cagr_pct": 4.45,
+          "max_drawdown_pct": -5.95,
+          "sharpe": 0.53,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 91.2,
+          "cagr_pct": 21.34,
+          "max_drawdown_pct": -16.28,
+          "sharpe": 1.08,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 389
+    },
+    {
+      "case": "tqqq_weight_up",
+      "passed": true,
+      "reasons": [],
+      "overrides": {
+        "tqqq_weight": 0.4
+      },
+      "execution_overrides": {},
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 839.34,
+        "cagr_pct": 15.71,
+        "max_drawdown_pct": -28.54,
+        "sharpe": 0.87
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 111.79,
+          "cagr_pct": 16.22,
+          "max_drawdown_pct": -15.37,
+          "sharpe": 0.9,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 72.34,
+          "cagr_pct": 14.62,
+          "max_drawdown_pct": -28.54,
+          "sharpe": 0.87,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 18.61,
+          "cagr_pct": 8.93,
+          "max_drawdown_pct": -18.94,
+          "sharpe": 0.58,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 2.5,
+          "cagr_pct": 2.53,
+          "max_drawdown_pct": -7.15,
+          "sharpe": 0.3,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 104.02,
+          "cagr_pct": 23.71,
+          "max_drawdown_pct": -19.05,
+          "sharpe": 1.05,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 389
+    },
+    {
+      "case": "slippage_5bps",
+      "passed": false,
+      "reasons": [
+        "does not beat SPY total return"
+      ],
+      "overrides": {},
+      "execution_overrides": {
+        "slippage_bps": 5.0
+      },
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 651.12,
+        "cagr_pct": 14.04,
+        "max_drawdown_pct": -27.08,
+        "sharpe": 0.83
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 98.93,
+          "cagr_pct": 14.78,
+          "max_drawdown_pct": -14.68,
+          "sharpe": 0.87,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 65.35,
+          "cagr_pct": 13.44,
+          "max_drawdown_pct": -27.08,
+          "sharpe": 0.85,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 12.66,
+          "cagr_pct": 6.16,
+          "max_drawdown_pct": -18.81,
+          "sharpe": 0.45,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 2.44,
+          "cagr_pct": 2.47,
+          "max_drawdown_pct": -6.69,
+          "sharpe": 0.31,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 91.28,
+          "cagr_pct": 21.35,
+          "max_drawdown_pct": -18.7,
+          "sharpe": 1.02,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 389
+    },
+    {
+      "case": "slippage_10bps",
+      "passed": false,
+      "reasons": [
+        "does not beat SPY total return",
+        "Sharpe below 0.80"
+      ],
+      "overrides": {},
+      "execution_overrides": {
+        "slippage_bps": 10.0
+      },
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 502.7,
+        "cagr_pct": 12.41,
+        "max_drawdown_pct": -28.16,
+        "sharpe": 0.75
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 92.25,
+          "cagr_pct": 13.99,
+          "max_drawdown_pct": -14.85,
+          "sharpe": 0.83,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 58.71,
+          "cagr_pct": 12.28,
+          "max_drawdown_pct": -28.16,
+          "sharpe": 0.79,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 4.57,
+          "cagr_pct": 2.26,
+          "max_drawdown_pct": -20.75,
+          "sharpe": 0.22,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 0.79,
+          "cagr_pct": 0.8,
+          "max_drawdown_pct": -6.92,
+          "sharpe": 0.13,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 81.19,
+          "cagr_pct": 19.41,
+          "max_drawdown_pct": -20.58,
+          "sharpe": 0.94,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 389
+    },
+    {
+      "case": "zero_cash_yield",
+      "passed": true,
+      "reasons": [],
+      "overrides": {},
+      "execution_overrides": {
+        "cash_yield_pct": 0.0
+      },
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 713.82,
+        "cagr_pct": 14.63,
+        "max_drawdown_pct": -26.78,
+        "sharpe": 0.87
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 98.67,
+          "cagr_pct": 14.74,
+          "max_drawdown_pct": -14.6,
+          "sharpe": 0.87,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 67.87,
+          "cagr_pct": 13.87,
+          "max_drawdown_pct": -26.78,
+          "sharpe": 0.88,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 16.84,
+          "cagr_pct": 8.11,
+          "max_drawdown_pct": -17.75,
+          "sharpe": 0.56,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 2.78,
+          "cagr_pct": 2.82,
+          "max_drawdown_pct": -6.56,
+          "sharpe": 0.34,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 96.46,
+          "cagr_pct": 22.33,
+          "max_drawdown_pct": -17.71,
+          "sharpe": 1.06,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 389
+    },
+    {
+      "case": "fee_5bps",
+      "passed": false,
+      "reasons": [
+        "does not beat SPY total return"
+      ],
+      "overrides": {},
+      "execution_overrides": {
+        "fee_bps": 5.0
+      },
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 619.33,
+        "cagr_pct": 13.72,
+        "max_drawdown_pct": -27.29,
+        "sharpe": 0.82
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 97.61,
+          "cagr_pct": 14.62,
+          "max_drawdown_pct": -14.71,
+          "sharpe": 0.86,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 64.04,
+          "cagr_pct": 13.21,
+          "max_drawdown_pct": -27.29,
+          "sharpe": 0.84,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 11.02,
+          "cagr_pct": 5.38,
+          "max_drawdown_pct": -19.19,
+          "sharpe": 0.4,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": 2.09,
+          "cagr_pct": 2.11,
+          "max_drawdown_pct": -6.74,
+          "sharpe": 0.27,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 89.29,
+          "cagr_pct": 20.98,
+          "max_drawdown_pct": -19.07,
+          "sharpe": 1.0,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 389
+    },
+    {
+      "case": "one_day_execution_delay",
+      "passed": false,
+      "reasons": [
+        "does not beat SPY total return",
+        "drawdown not better than SPY",
+        "Sharpe below 0.80",
+        "inflation_bear not profitable"
+      ],
+      "overrides": {},
+      "execution_overrides": {
+        "execution_delay_days": 1
+      },
+      "full": {
+        "start": "2011-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 389.53,
+        "cagr_pct": 10.9,
+        "max_drawdown_pct": -35.53,
+        "sharpe": 0.67
+      },
+      "continuous_regimes": [
+        {
+          "start": "2011-01-03",
+          "end": "2015-12-31",
+          "total_return_pct": 57.87,
+          "cagr_pct": 9.58,
+          "max_drawdown_pct": -22.03,
+          "sharpe": 0.61,
+          "regime": "post_gfc_bull"
+        },
+        {
+          "start": "2016-01-04",
+          "end": "2019-12-31",
+          "total_return_pct": 42.59,
+          "cagr_pct": 9.3,
+          "max_drawdown_pct": -35.53,
+          "sharpe": 0.62,
+          "regime": "late_cycle_chop"
+        },
+        {
+          "start": "2020-01-02",
+          "end": "2021-12-31",
+          "total_return_pct": 23.55,
+          "cagr_pct": 11.18,
+          "max_drawdown_pct": -18.41,
+          "sharpe": 0.72,
+          "regime": "covid_crash_recovery"
+        },
+        {
+          "start": "2022-01-03",
+          "end": "2022-12-30",
+          "total_return_pct": -1.62,
+          "cagr_pct": -1.64,
+          "max_drawdown_pct": -6.97,
+          "sharpe": -0.13,
+          "regime": "inflation_bear"
+        },
+        {
+          "start": "2023-01-03",
+          "end": "2026-05-11",
+          "total_return_pct": 78.25,
+          "cagr_pct": 18.82,
+          "max_drawdown_pct": -20.83,
+          "sharpe": 0.91,
+          "regime": "ai_liquidity_bull"
+        }
+      ],
+      "transitions": [
+        {
+          "date": "2011-01-03",
+          "state": "cash"
+        },
+        {
+          "date": "2011-10-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-10-27",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-10-31",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-11-08",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-11-09",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-05",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-06",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-09",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2011-12-12",
+          "state": "risk_off"
+        },
+        {
+          "date": "2011-12-22",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-02-01",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-05-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-16",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-18",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-05-21",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-05-24",
+          "state": "repair"
+        },
+        {
+          "date": "2012-05-30",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-07",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-11",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-06-14",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-19",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-06-21",
+          "state": "repair"
+        },
+        {
+          "date": "2012-06-29",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-09",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-13",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-16",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-17",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-07-23",
+          "state": "repair"
+        },
+        {
+          "date": "2012-07-26",
+          "state": "risk_on"
+        },
+        {
+          "date": "2012-11-07",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2012-11-14",
+          "state": "risk_off"
+        },
+        {
+          "date": "2012-11-19",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-02",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-04",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-09",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-01-14",
+          "state": "defensive_spy"
+        },
+        {
+          "date": "2013-01-23",
+          "state": "risk_on"
+        },
+        {
+          "date": "2013-08-27",
+          "state": "repair"
+        },
+        {
+          "date": "2013-08-28",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-02-03",
+          "state": "repair"
+        },
+        {
+          "date": "2014-02-06",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-04-11",
+          "state": "repair"
+        },
+        {
+          "date": "2014-04-14",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-01",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-03",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-07",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-08",
+          "state": "risk_on"
+        },
+        {
+          "date": "2014-10-09",
+          "state": "repair"
+        },
+        {
+          "date": "2014-10-13",
+          "state": "risk_off"
+        }
+      ],
+      "transition_count": 389
+    }
+  ]
+}
