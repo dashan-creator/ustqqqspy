@@ -21,7 +21,9 @@
     "drawdown_guard_pct": 12.0,
     "cash_yield_pct": 2.0,
     "hedge_symbol": "SH",
-    "hedge_weight": 0.0
+    "hedge_weight": 0.0,
+    "risk_off_symbols": "",
+    "risk_off_weights": ""
   },
   "strategy": {
     "start": "2011-01-03",
@@ -153,8 +155,91 @@
       "regime": "ai_liquidity_bull"
     }
   ],
+  "continuous_regimes": [
+    {
+      "start": "2011-01-03",
+      "end": "2015-12-31",
+      "initial_cash": 100000.0,
+      "final_cash": 189005.26,
+      "total_return_pct": 89.01,
+      "cagr_pct": 13.6,
+      "max_drawdown_pct": -18.95,
+      "sharpe": 0.81,
+      "total_trades": 0,
+      "win_rate_pct": 0.0,
+      "profit_factor": null,
+      "avg_trade_pct": 0.0,
+      "regime": "post_gfc_bull"
+    },
+    {
+      "start": "2016-01-04",
+      "end": "2019-12-31",
+      "initial_cash": 100000.0,
+      "final_cash": 183387.05,
+      "total_return_pct": 83.39,
+      "cagr_pct": 16.42,
+      "max_drawdown_pct": -27.12,
+      "sharpe": 0.94,
+      "total_trades": 0,
+      "win_rate_pct": 0.0,
+      "profit_factor": null,
+      "avg_trade_pct": 0.0,
+      "regime": "late_cycle_chop"
+    },
+    {
+      "start": "2020-01-02",
+      "end": "2021-12-31",
+      "initial_cash": 100000.0,
+      "final_cash": 135098.67,
+      "total_return_pct": 35.1,
+      "cagr_pct": 16.27,
+      "max_drawdown_pct": -23.08,
+      "sharpe": 0.8,
+      "total_trades": 0,
+      "win_rate_pct": 0.0,
+      "profit_factor": null,
+      "avg_trade_pct": 0.0,
+      "regime": "covid_crash_recovery"
+    },
+    {
+      "start": "2022-01-03",
+      "end": "2022-12-30",
+      "initial_cash": 100000.0,
+      "final_cash": 85357.3,
+      "total_return_pct": -14.64,
+      "cagr_pct": -14.8,
+      "max_drawdown_pct": -15.12,
+      "sharpe": -1.93,
+      "total_trades": 0,
+      "win_rate_pct": 0.0,
+      "profit_factor": null,
+      "avg_trade_pct": 0.0,
+      "regime": "inflation_bear"
+    },
+    {
+      "start": "2023-01-03",
+      "end": "2026-05-11",
+      "initial_cash": 100000.0,
+      "final_cash": 195294.07,
+      "total_return_pct": 95.29,
+      "cagr_pct": 22.11,
+      "max_drawdown_pct": -22.04,
+      "sharpe": 1.02,
+      "total_trades": 0,
+      "win_rate_pct": 0.0,
+      "profit_factor": null,
+      "avg_trade_pct": 0.0,
+      "regime": "ai_liquidity_bull"
+    }
+  ],
   "stability_gate": {
     "passed": true,
     "reasons": []
+  },
+  "all_cycle_profit_gate": {
+    "passed": false,
+    "reasons": [
+      "continuous inflation_bear return was not profitable (-14.64%)"
+    ]
   }
 }

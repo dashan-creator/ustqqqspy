@@ -452,6 +452,16 @@ def summarize(initial_cash: float, final_cash: float, equity_curve: list[dict], 
     }
 
 
+def summarize_equity_slice(equity: pd.Series, initial_cash: float, start: pd.Timestamp, end: pd.Timestamp) -> dict:
+    window = equity.loc[equity.index >= start]
+    window = window.loc[window.index <= end]
+    if window.empty:
+        raise RuntimeError(f"no equity data between {start.date()} and {end.date()}")
+    normalized = window / float(window.iloc[0]) * initial_cash
+    curve = [{"date": idx.date().isoformat(), "equity": float(value)} for idx, value in normalized.items()]
+    return summarize(initial_cash, float(normalized.iloc[-1]), curve, [], window.index[0], window.index[-1])
+
+
 def buy_hold(data: dict[str, pd.DataFrame], ticker: str, cfg: BacktestConfig) -> dict:
     df = data[ticker].loc[data[ticker].index >= pd.Timestamp(cfg.start)].copy()
     if cfg.end:
@@ -491,6 +501,27 @@ def allocation_regime_slices(data: dict[str, pd.DataFrame], cfg: BacktestConfig)
         try:
             result = run_allocation_backtest(data, sub_cfg)
             result.pop("rebalance_trades", None)
+            result.pop("equity_curve", None)
+            result["regime"] = name
+            slices.append(result)
+        except Exception as exc:
+            slices.append({"regime": name, "error": str(exc)})
+    return slices
+
+
+def continuous_regime_slices(strategy_result: dict, cfg: BacktestConfig) -> list[dict]:
+    equity_curve = strategy_result.get("equity_curve") or []
+    if not equity_curve:
+        return []
+    equity = pd.Series({pd.Timestamp(row["date"]): row["equity"] for row in equity_curve}).sort_index()
+    slices = []
+    for name, start, end in REGIMES:
+        regime_start = max(pd.Timestamp(start), equity.index[0])
+        regime_end = pd.Timestamp(end) if end else equity.index[-1]
+        regime_end = min(regime_end, equity.index[-1])
+        try:
+            result = summarize_equity_slice(equity, cfg.initial_cash, regime_start, regime_end)
+            result.pop("trades", None)
             result.pop("equity_curve", None)
             result["regime"] = name
             slices.append(result)
@@ -588,6 +619,19 @@ def allocation_stability_gate(strategy_result: dict, regimes: list[dict], spy_bh
     return {"passed": not reasons, "reasons": reasons}
 
 
+def all_cycle_profit_gate(base_gate: dict, continuous_regimes: list[dict]) -> dict:
+    completed = [r for r in continuous_regimes if "error" not in r]
+    reasons = list(base_gate["reasons"])
+    if not completed:
+        reasons.append("continuous regime slices were not available")
+    losing = [r for r in completed if r["total_return_pct"] <= 0]
+    for regime in losing:
+        reasons.append(
+            f"continuous {regime['regime']} return was not profitable ({regime['total_return_pct']:.2f}%)"
+        )
+    return {"passed": not reasons, "reasons": reasons}
+
+
 def print_summary(report: dict) -> None:
     print("\nSPY/TQQQ Cycle Backtest")
     print("=" * 88)
@@ -607,10 +651,25 @@ def print_summary(report: dict) -> None:
             f"{r['regime']:<22} return={r['total_return_pct']:>8.2f}% "
             f"DD={r['max_drawdown_pct']:>7.2f}% trades={r['total_trades']:>3}"
         )
+    if report.get("continuous_regimes"):
+        print("\nContinuous full-run regime slices")
+        for r in report["continuous_regimes"]:
+            if "error" in r:
+                print(f"{r['regime']:<22} ERROR {r['error']}")
+                continue
+            print(
+                f"{r['regime']:<22} return={r['total_return_pct']:>8.2f}% "
+                f"DD={r['max_drawdown_pct']:>7.2f}%"
+            )
     gate = report["stability_gate"]
     print("\nStability gate:", "PASS" if gate["passed"] else "FAIL")
     for reason in gate["reasons"]:
         print(f"- {reason}")
+    if report.get("all_cycle_profit_gate"):
+        strict_gate = report["all_cycle_profit_gate"]
+        print("\nAll-cycle profit gate:", "PASS" if strict_gate["passed"] else "FAIL")
+        for reason in strict_gate["reasons"]:
+            print(f"- {reason}")
 
     if report.get("top_grid"):
         print("\nTop allocation grid candidates")
@@ -696,6 +755,7 @@ def main() -> None:
     spy_bh = buy_hold(data, "SPY", cfg)
     tqqq_bh = buy_hold(data, "TQQQ", cfg)
     regimes = allocation_regime_slices(data, cfg) if args.mode == "allocation" else regime_slices(data, cfg, strategy)
+    continuous_regimes = continuous_regime_slices(strategy_result, cfg)
     report = {
         "mode": args.mode,
         "config": asdict(cfg),
@@ -703,11 +763,13 @@ def main() -> None:
         "buy_hold_spy": {k: v for k, v in spy_bh.items() if k not in {"trades", "equity_curve"}},
         "buy_hold_tqqq": {k: v for k, v in tqqq_bh.items() if k not in {"trades", "equity_curve"}},
         "regimes": regimes,
+        "continuous_regimes": continuous_regimes,
     }
     if args.mode == "allocation":
         report["stability_gate"] = allocation_stability_gate(report["strategy"], regimes, report["buy_hold_spy"], report["buy_hold_tqqq"])
     else:
         report["stability_gate"] = stability_gate(report["strategy"], regimes, report["buy_hold_spy"], report["buy_hold_tqqq"])
+    report["all_cycle_profit_gate"] = all_cycle_profit_gate(report["stability_gate"], continuous_regimes)
     if args.grid_search:
         report["top_grid"] = grid_search_allocation(data, cfg)
     print_summary(report)

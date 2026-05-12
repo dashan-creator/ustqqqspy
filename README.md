@@ -64,8 +64,9 @@ Latest checked result, using Yahoo daily data from 2011-01-03 to 2026-05-11 with
 
 The stability gate passes only when the allocation beats buy-and-hold SPY, has lower drawdown
 than SPY and TQQQ, Sharpe is at least 0.80, and at least 80% of tested market regimes are profitable.
-The 2022 inflation-bear slice was still negative (-14.66%), so this is a backtested risk-managed
-allocation, not a profit guarantee.
+The report also includes a stricter all-cycle profit gate based on continuous full-run equity slices.
+That strict gate currently fails because the 2022 inflation-bear slice remains negative (-14.64% on
+the continuous full-run slice), so this is a backtested risk-managed allocation, not a profit guarantee.
 
 Frontend:
 
