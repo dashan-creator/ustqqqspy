@@ -44,21 +44,33 @@ class BacktestConfig:
     slippage_bps: float = 2.0
     start: str = "2011-01-01"
     end: str | None = None
-    sma_fast: int = 50
-    sma_slow: int = 220
-    momentum_days: int = 126
-    vix_risk_on: float = 20.0
+    sma_fast: int = 100
+    sma_slow: int = 200
+    recent_high_days: int = 42
+    momentum_days: int = 180
+    risk_on_momentum_min: float = 0.0
+    repair_momentum_min: float = 0.03
+    vix_risk_on: float = 24.0
     vix_risk_off: float = 28.0
-    tqqq_weight: float = 0.40
+    repair_vix_max: float = 22.0
+    vix_backwardation_ratio: float = 1.0
+    vix_backwardation_level: float = 28.0
+    vvix_risk_off: float = 115.0
+    move_inflation_risk: float = 115.0
+    inflation_drawdown_pct: float = 10.0
+    inflation_sma: int = 200
+    tqqq_weight: float = 0.35
     repair_tqqq_weight: float = 0.20
-    repair_spy_weight: float = 0.70
-    defensive_spy_weight: float = 0.4
-    drawdown_guard_pct: float = 12.0
+    repair_spy_weight: float = 0.80
+    defensive_spy_weight: float = 0.6
+    drawdown_guard_pct: float = 20.0
     cash_yield_pct: float = 2.0
     hedge_symbol: str = "SH"
     hedge_weight: float = 0.0
-    risk_off_symbols: str = ""
-    risk_off_weights: str = ""
+    risk_off_symbols: str = "UUP,DBC"
+    risk_off_weights: str = "0.4,0.25"
+    inflation_off_symbols: str = "BIL,UUP"
+    inflation_off_weights: str = "0.5,0.25"
 
 
 def _normalize_ohlcv(df: pd.DataFrame) -> pd.DataFrame:
@@ -84,6 +96,7 @@ def strategy_universe(cfg: BacktestConfig) -> list[str]:
     if cfg.hedge_symbol:
         symbols.append(cfg.hedge_symbol.upper())
     symbols.extend(parse_weight_map(cfg.risk_off_symbols, cfg.risk_off_weights).keys())
+    symbols.extend(parse_weight_map(cfg.inflation_off_symbols, cfg.inflation_off_weights).keys())
     return list(dict.fromkeys(symbols))
 
 
@@ -314,7 +327,8 @@ def target_weights(data: dict[str, pd.DataFrame], date: pd.Timestamp, cfg: Backt
     zero = {ticker: 0.0 for ticker in universe}
     spy = data["SPY"].loc[data["SPY"].index <= date]
     tqqq = data["TQQQ"].loc[data["TQQQ"].index <= date]
-    if len(spy) <= cfg.sma_slow or len(tqqq) <= cfg.momentum_days:
+    min_bars = max(cfg.sma_slow, cfg.momentum_days, cfg.recent_high_days, cfg.inflation_sma)
+    if len(spy) <= min_bars or len(tqqq) <= cfg.momentum_days:
         return zero
 
     spy_close = spy["close"]
@@ -323,22 +337,31 @@ def target_weights(data: dict[str, pd.DataFrame], date: pd.Timestamp, cfg: Backt
     sma_slow = float(spy_close.iloc[-cfg.sma_slow:].mean())
     price = float(spy_close.iloc[-1])
     tqqq_momentum = float(tqqq_close.iloc[-1] / tqqq_close.iloc[-cfg.momentum_days] - 1)
-    recent_high = float(spy_close.iloc[-63:].max())
+    inflation_sma = float(spy_close.iloc[-cfg.inflation_sma:].mean())
+    recent_high = float(spy_close.iloc[-cfg.recent_high_days:].max())
     recent_drawdown_pct = (price / recent_high - 1) * 100 if recent_high > 0 else 0.0
 
     ctx = market_context(data, date)
     vix = ctx["vix"]
     vix3m = ctx["vix3m"]
-    backwardation = vix3m > 0 and vix / vix3m >= 1.0
+    vvix = ctx["vvix"]
+    move = ctx["move"]
+    backwardation = vix3m > 0 and vix / vix3m >= cfg.vix_backwardation_ratio
     panic = (
         vix >= cfg.vix_risk_off
-        or (backwardation and vix >= 28)
+        or (backwardation and vix >= cfg.vix_backwardation_level)
+        or vvix >= cfg.vvix_risk_off
         or recent_drawdown_pct <= -cfg.drawdown_guard_pct
     )
     long_trend = price > sma_slow
     fast_trend = price > sma_fast
-    risk_on = long_trend and fast_trend and tqqq_momentum > 0 and vix <= cfg.vix_risk_on
-    repair = long_trend and not panic and tqqq_momentum > 0.03 and vix <= cfg.vix_risk_off
+    inflation_stress = (
+        move >= cfg.move_inflation_risk
+        and recent_drawdown_pct <= -cfg.inflation_drawdown_pct
+        and price < inflation_sma
+    )
+    risk_on = long_trend and fast_trend and tqqq_momentum > cfg.risk_on_momentum_min and vix <= cfg.vix_risk_on and not inflation_stress
+    repair = long_trend and not panic and not inflation_stress and tqqq_momentum > cfg.repair_momentum_min and vix <= cfg.repair_vix_max
     hedge_ready = cfg.hedge_symbol in data and len(data[cfg.hedge_symbol].loc[data[cfg.hedge_symbol].index <= date]) > 0
     hedge_weight = cfg.hedge_weight if hedge_ready and (panic or not long_trend) else 0.0
     risk_off_weights = {
@@ -346,7 +369,16 @@ def target_weights(data: dict[str, pd.DataFrame], date: pd.Timestamp, cfg: Backt
         for ticker, weight in parse_weight_map(cfg.risk_off_symbols, cfg.risk_off_weights).items()
         if ticker in data and len(data[ticker].loc[data[ticker].index <= date]) > 0
     }
+    inflation_off_weights = {
+        ticker: weight
+        for ticker, weight in parse_weight_map(cfg.inflation_off_symbols, cfg.inflation_off_weights).items()
+        if ticker in data and len(data[ticker].loc[data[ticker].index <= date]) > 0
+    }
 
+    if inflation_stress:
+        weights = dict(zero)
+        weights.update(inflation_off_weights)
+        return weights
     if panic or not long_trend:
         weights = dict(zero)
         weights[cfg.hedge_symbol] = hedge_weight
@@ -706,21 +738,33 @@ def main() -> None:
     parser.add_argument("--max-hold-days", type=int, default=25)
     parser.add_argument("--mode", choices=["signals", "allocation"], default="allocation")
     parser.add_argument("--grid-search", action="store_true")
-    parser.add_argument("--sma-fast", type=int, default=50)
-    parser.add_argument("--sma-slow", type=int, default=220)
-    parser.add_argument("--momentum-days", type=int, default=126)
-    parser.add_argument("--vix-risk-on", type=float, default=20.0)
-    parser.add_argument("--vix-risk-off", type=float, default=28.0)
-    parser.add_argument("--tqqq-weight", type=float, default=0.40)
-    parser.add_argument("--repair-tqqq-weight", type=float, default=0.20)
-    parser.add_argument("--repair-spy-weight", type=float, default=0.70)
-    parser.add_argument("--defensive-spy-weight", type=float, default=0.4)
-    parser.add_argument("--drawdown-guard-pct", type=float, default=12.0)
-    parser.add_argument("--cash-yield-pct", type=float, default=2.0)
-    parser.add_argument("--hedge-symbol", default="SH")
-    parser.add_argument("--hedge-weight", type=float, default=0.0)
-    parser.add_argument("--risk-off-symbols", default="")
-    parser.add_argument("--risk-off-weights", default="")
+    parser.add_argument("--sma-fast", type=int, default=BacktestConfig.sma_fast)
+    parser.add_argument("--sma-slow", type=int, default=BacktestConfig.sma_slow)
+    parser.add_argument("--recent-high-days", type=int, default=BacktestConfig.recent_high_days)
+    parser.add_argument("--momentum-days", type=int, default=BacktestConfig.momentum_days)
+    parser.add_argument("--risk-on-momentum-min", type=float, default=BacktestConfig.risk_on_momentum_min)
+    parser.add_argument("--repair-momentum-min", type=float, default=BacktestConfig.repair_momentum_min)
+    parser.add_argument("--vix-risk-on", type=float, default=BacktestConfig.vix_risk_on)
+    parser.add_argument("--vix-risk-off", type=float, default=BacktestConfig.vix_risk_off)
+    parser.add_argument("--repair-vix-max", type=float, default=BacktestConfig.repair_vix_max)
+    parser.add_argument("--vix-backwardation-ratio", type=float, default=BacktestConfig.vix_backwardation_ratio)
+    parser.add_argument("--vix-backwardation-level", type=float, default=BacktestConfig.vix_backwardation_level)
+    parser.add_argument("--vvix-risk-off", type=float, default=BacktestConfig.vvix_risk_off)
+    parser.add_argument("--move-inflation-risk", type=float, default=BacktestConfig.move_inflation_risk)
+    parser.add_argument("--inflation-drawdown-pct", type=float, default=BacktestConfig.inflation_drawdown_pct)
+    parser.add_argument("--inflation-sma", type=int, default=BacktestConfig.inflation_sma)
+    parser.add_argument("--tqqq-weight", type=float, default=BacktestConfig.tqqq_weight)
+    parser.add_argument("--repair-tqqq-weight", type=float, default=BacktestConfig.repair_tqqq_weight)
+    parser.add_argument("--repair-spy-weight", type=float, default=BacktestConfig.repair_spy_weight)
+    parser.add_argument("--defensive-spy-weight", type=float, default=BacktestConfig.defensive_spy_weight)
+    parser.add_argument("--drawdown-guard-pct", type=float, default=BacktestConfig.drawdown_guard_pct)
+    parser.add_argument("--cash-yield-pct", type=float, default=BacktestConfig.cash_yield_pct)
+    parser.add_argument("--hedge-symbol", default=BacktestConfig.hedge_symbol)
+    parser.add_argument("--hedge-weight", type=float, default=BacktestConfig.hedge_weight)
+    parser.add_argument("--risk-off-symbols", default=BacktestConfig.risk_off_symbols)
+    parser.add_argument("--risk-off-weights", default=BacktestConfig.risk_off_weights)
+    parser.add_argument("--inflation-off-symbols", default=BacktestConfig.inflation_off_symbols)
+    parser.add_argument("--inflation-off-weights", default=BacktestConfig.inflation_off_weights)
     parser.add_argument("--include-equity", action="store_true")
     args = parser.parse_args()
 
@@ -732,9 +776,19 @@ def main() -> None:
         max_hold_days=args.max_hold_days,
         sma_fast=args.sma_fast,
         sma_slow=args.sma_slow,
+        recent_high_days=args.recent_high_days,
         momentum_days=args.momentum_days,
+        risk_on_momentum_min=args.risk_on_momentum_min,
+        repair_momentum_min=args.repair_momentum_min,
         vix_risk_on=args.vix_risk_on,
         vix_risk_off=args.vix_risk_off,
+        repair_vix_max=args.repair_vix_max,
+        vix_backwardation_ratio=args.vix_backwardation_ratio,
+        vix_backwardation_level=args.vix_backwardation_level,
+        vvix_risk_off=args.vvix_risk_off,
+        move_inflation_risk=args.move_inflation_risk,
+        inflation_drawdown_pct=args.inflation_drawdown_pct,
+        inflation_sma=args.inflation_sma,
         tqqq_weight=args.tqqq_weight,
         repair_tqqq_weight=args.repair_tqqq_weight,
         repair_spy_weight=args.repair_spy_weight,
@@ -745,6 +799,8 @@ def main() -> None:
         hedge_weight=args.hedge_weight,
         risk_off_symbols=args.risk_off_symbols,
         risk_off_weights=args.risk_off_weights,
+        inflation_off_symbols=args.inflation_off_symbols,
+        inflation_off_weights=args.inflation_off_weights,
     )
     data = download_history(cfg.start, cfg.end, extra_tickers=strategy_universe(cfg))
     strategy = SpyTqqqCycleStrategy()

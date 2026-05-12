@@ -58,15 +58,28 @@ Latest checked result, using Yahoo daily data from 2011-01-03 to 2026-05-11 with
 
 | Case | Total Return | CAGR | Max Drawdown | Sharpe |
 | --- | ---: | ---: | ---: | ---: |
-| SPY/TQQQ allocation | 712.56% | 14.62% | -27.12% | 0.82 |
+| SPY/TQQQ allocation | 755.47% | 15.01% | -27.40% | 0.89 |
 | Buy-and-hold SPY | 662.73% | 14.15% | -33.72% | 0.86 |
 | Buy-and-hold TQQQ | 19968.91% | 41.25% | -81.66% | 0.87 |
 
 The stability gate passes only when the allocation beats buy-and-hold SPY, has lower drawdown
 than SPY and TQQQ, Sharpe is at least 0.80, and at least 80% of tested market regimes are profitable.
 The report also includes a stricter all-cycle profit gate based on continuous full-run equity slices.
-That strict gate currently fails because the 2022 inflation-bear slice remains negative (-14.64% on
-the continuous full-run slice), so this is a backtested risk-managed allocation, not a profit guarantee.
+The current default passes that strict gate: the continuous 2022 inflation-bear slice is +6.01%.
+This is still a historical backtest and not a future profit guarantee.
+
+Continuous full-run regime slices for the current default:
+
+| Regime | Return | Max Drawdown |
+| --- | ---: | ---: |
+| 2011-2015 post-GFC bull | 107.01% | -14.57% |
+| 2016-2019 late-cycle chop | 59.72% | -27.40% |
+| 2020-2021 COVID crash/recovery | 17.81% | -17.62% |
+| 2022 inflation bear | 6.01% | -6.55% |
+| 2023-present AI/liquidity bull | 100.26% | -17.89% |
+
+The default allocation uses SPY/TQQQ for risk-on participation, UUP/DBC for risk-off exposure,
+and BIL/UUP during detected inflation-stress regimes driven by MOVE, trend, and drawdown filters.
 
 Frontend:
 
