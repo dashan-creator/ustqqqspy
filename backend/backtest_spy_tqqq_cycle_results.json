@@ -17,7 +17,7 @@
     "repair_momentum_min": 0.03,
     "vix_risk_on": 24.0,
     "vix_risk_off": 28.0,
-    "repair_vix_max": 22.0,
+    "repair_vix_max": 24.0,
     "vix_backwardation_ratio": 1.0,
     "vix_backwardation_level": 28.0,
     "vvix_risk_off": 115.0,
@@ -41,16 +41,16 @@
     "start": "2011-01-03",
     "end": "2026-05-11",
     "initial_cash": 100000.0,
-    "final_cash": 894872.44,
-    "total_return_pct": 794.87,
-    "cagr_pct": 15.35,
+    "final_cash": 906414.85,
+    "total_return_pct": 806.41,
+    "cagr_pct": 15.44,
     "max_drawdown_pct": -25.88,
     "sharpe": 0.9,
     "total_trades": 0,
     "win_rate_pct": 0.0,
     "profit_factor": null,
     "avg_trade_pct": 0.0,
-    "total_rebalances": 2102,
+    "total_rebalances": 2104,
     "state_exposure": {
       "total_days": 3861,
       "states": [
@@ -66,8 +66,8 @@
         },
         {
           "state": "normal_defense",
-          "days": 335,
-          "pct_days": 8.68
+          "days": 324,
+          "pct_days": 8.39
         },
         {
           "state": "warmup",
@@ -76,8 +76,8 @@
         },
         {
           "state": "repair",
-          "days": 145,
-          "pct_days": 3.76
+          "days": 156,
+          "pct_days": 4.04
         },
         {
           "state": "inflation_stress",
@@ -86,13 +86,13 @@
         }
       ],
       "average_weights": {
-        "SPY": 0.4717,
-        "TQQQ": 0.2173,
+        "SPY": 0.4722,
+        "TQQQ": 0.2178,
         "UUP": 0.0859,
         "DBC": 0.0508,
         "BIL": 0.0095
       },
-      "state_changes": 390
+      "state_changes": 386
     }
   },
   "buy_hold_spy": {
@@ -128,17 +128,17 @@
       "start": "2011-01-03",
       "end": "2015-12-31",
       "initial_cash": 100000.0,
-      "final_cash": 202472.69,
-      "total_return_pct": 102.47,
-      "cagr_pct": 15.18,
-      "max_drawdown_pct": -15.44,
-      "sharpe": 0.89,
+      "final_cash": 199580.95,
+      "total_return_pct": 99.58,
+      "cagr_pct": 14.85,
+      "max_drawdown_pct": -15.88,
+      "sharpe": 0.87,
       "total_trades": 0,
       "win_rate_pct": 0.0,
       "profit_factor": null,
       "avg_trade_pct": 0.0,
       "trades": [],
-      "total_rebalances": 492,
+      "total_rebalances": 494,
       "state_exposure": {
         "total_days": 1258,
         "states": [
@@ -159,18 +159,18 @@
           },
           {
             "state": "repair",
-            "days": 63,
-            "pct_days": 5.01
+            "days": 67,
+            "pct_days": 5.33
           },
           {
             "state": "normal_defense",
-            "days": 59,
-            "pct_days": 4.69
+            "days": 55,
+            "pct_days": 4.37
           }
         ],
         "average_weights": {
-          "SPY": 0.4919,
-          "TQQQ": 0.2382,
+          "SPY": 0.4925,
+          "TQQQ": 0.2388,
           "UUP": 0.0337,
           "DBC": 0.0211
         },
@@ -182,17 +182,17 @@
       "start": "2016-01-04",
       "end": "2019-12-31",
       "initial_cash": 100000.0,
-      "final_cash": 172621.67,
-      "total_return_pct": 72.62,
-      "cagr_pct": 14.67,
+      "final_cash": 176509.87,
+      "total_return_pct": 76.51,
+      "cagr_pct": 15.31,
       "max_drawdown_pct": -25.88,
-      "sharpe": 0.93,
+      "sharpe": 0.96,
       "total_trades": 0,
       "win_rate_pct": 0.0,
       "profit_factor": null,
       "avg_trade_pct": 0.0,
       "trades": [],
-      "total_rebalances": 501,
+      "total_rebalances": 500,
       "state_exposure": {
         "total_days": 1006,
         "states": [
@@ -202,28 +202,28 @@
             "pct_days": 65.21
           },
           {
-            "state": "normal_defense",
-            "days": 152,
-            "pct_days": 15.11
-          },
-          {
             "state": "risk_off",
             "days": 152,
             "pct_days": 15.11
           },
           {
+            "state": "normal_defense",
+            "days": 150,
+            "pct_days": 14.91
+          },
+          {
             "state": "repair",
-            "days": 46,
-            "pct_days": 4.57
+            "days": 48,
+            "pct_days": 4.77
           }
         ],
         "average_weights": {
-          "SPY": 0.5511,
-          "TQQQ": 0.2374,
+          "SPY": 0.5515,
+          "TQQQ": 0.2378,
           "UUP": 0.0604,
           "DBC": 0.0378
         },
-        "state_changes": 93
+        "state_changes": 90
       },
       "regime": "late_cycle_chop"
     },
@@ -286,17 +286,17 @@
       "start": "2022-01-03",
       "end": "2022-12-30",
       "initial_cash": 100000.0,
-      "final_cash": 106384.9,
-      "total_return_pct": 6.38,
-      "cagr_pct": 6.46,
+      "final_cash": 108178.23,
+      "total_return_pct": 8.18,
+      "cagr_pct": 8.28,
       "max_drawdown_pct": -6.56,
-      "sharpe": 0.65,
+      "sharpe": 0.77,
       "total_trades": 0,
       "win_rate_pct": 0.0,
       "profit_factor": null,
       "avg_trade_pct": 0.0,
       "trades": [],
-      "total_rebalances": 147,
+      "total_rebalances": 146,
       "state_exposure": {
         "total_days": 251,
         "states": [
@@ -317,23 +317,23 @@
           },
           {
             "state": "normal_defense",
-            "days": 12,
-            "pct_days": 4.78
+            "days": 8,
+            "pct_days": 3.19
           },
           {
             "state": "repair",
-            "days": 1,
-            "pct_days": 0.4
+            "days": 5,
+            "pct_days": 1.99
           }
         ],
         "average_weights": {
-          "SPY": 0.0655,
-          "TQQQ": 0.0189,
+          "SPY": 0.0687,
+          "TQQQ": 0.0221,
           "UUP": 0.3287,
           "DBC": 0.1743,
           "BIL": 0.0996
         },
-        "state_changes": 31
+        "state_changes": 30
       },
       "regime": "inflation_bear"
     },
@@ -341,17 +341,17 @@
       "start": "2023-01-03",
       "end": "2026-05-11",
       "initial_cash": 100000.0,
-      "final_cash": 197375.31,
-      "total_return_pct": 97.38,
-      "cagr_pct": 22.49,
+      "final_cash": 195061.93,
+      "total_return_pct": 95.06,
+      "cagr_pct": 22.06,
       "max_drawdown_pct": -19.95,
-      "sharpe": 1.06,
+      "sharpe": 1.04,
       "total_trades": 0,
       "win_rate_pct": 0.0,
       "profit_factor": null,
       "avg_trade_pct": 0.0,
       "trades": [],
-      "total_rebalances": 489,
+      "total_rebalances": 491,
       "state_exposure": {
         "total_days": 841,
         "states": [
@@ -367,13 +367,13 @@
           },
           {
             "state": "normal_defense",
-            "days": 68,
-            "pct_days": 8.09
+            "days": 67,
+            "pct_days": 7.97
           },
           {
             "state": "repair",
-            "days": 34,
-            "pct_days": 4.04
+            "days": 35,
+            "pct_days": 4.16
           },
           {
             "state": "inflation_stress",
@@ -382,8 +382,8 @@
           }
         ],
         "average_weights": {
-          "SPY": 0.557,
-          "TQQQ": 0.2644,
+          "SPY": 0.5572,
+          "TQQQ": 0.2647,
           "UUP": 0.0564,
           "DBC": 0.033,
           "BIL": 0.0071
@@ -398,11 +398,11 @@
       "start": "2011-01-03",
       "end": "2015-12-31",
       "initial_cash": 100000.0,
-      "final_cash": 202456.62,
-      "total_return_pct": 102.46,
-      "cagr_pct": 15.18,
-      "max_drawdown_pct": -15.44,
-      "sharpe": 0.89,
+      "final_cash": 199565.11,
+      "total_return_pct": 99.57,
+      "cagr_pct": 14.85,
+      "max_drawdown_pct": -15.88,
+      "sharpe": 0.87,
       "total_trades": 0,
       "win_rate_pct": 0.0,
       "profit_factor": null,
@@ -413,11 +413,11 @@
       "start": "2016-01-04",
       "end": "2019-12-31",
       "initial_cash": 100000.0,
-      "final_cash": 172658.54,
-      "total_return_pct": 72.66,
-      "cagr_pct": 14.67,
+      "final_cash": 176547.58,
+      "total_return_pct": 76.55,
+      "cagr_pct": 15.31,
       "max_drawdown_pct": -25.88,
-      "sharpe": 0.93,
+      "sharpe": 0.96,
       "total_trades": 0,
       "win_rate_pct": 0.0,
       "profit_factor": null,
@@ -443,11 +443,11 @@
       "start": "2022-01-03",
       "end": "2022-12-30",
       "initial_cash": 100000.0,
-      "final_cash": 106415.51,
-      "total_return_pct": 6.42,
-      "cagr_pct": 6.49,
+      "final_cash": 108209.35,
+      "total_return_pct": 8.21,
+      "cagr_pct": 8.31,
       "max_drawdown_pct": -6.55,
-      "sharpe": 0.65,
+      "sharpe": 0.77,
       "total_trades": 0,
       "win_rate_pct": 0.0,
       "profit_factor": null,
@@ -458,11 +458,11 @@
       "start": "2023-01-03",
       "end": "2026-05-11",
       "initial_cash": 100000.0,
-      "final_cash": 197395.21,
-      "total_return_pct": 97.4,
-      "cagr_pct": 22.5,
+      "final_cash": 195081.59,
+      "total_return_pct": 95.08,
+      "cagr_pct": 22.07,
       "max_drawdown_pct": -19.95,
-      "sharpe": 1.06,
+      "sharpe": 1.04,
       "total_trades": 0,
       "win_rate_pct": 0.0,
       "profit_factor": null,

@@ -18,7 +18,7 @@
     "repair_momentum_min": 0.03,
     "vix_risk_on": 24.0,
     "vix_risk_off": 28.0,
-    "repair_vix_max": 22.0,
+    "repair_vix_max": 24.0,
     "vix_backwardation_ratio": 1.0,
     "vix_backwardation_level": 28.0,
     "vvix_risk_off": 115.0,
@@ -41,9 +41,9 @@
   "default_full_sample": {
     "start": "2011-01-03",
     "end": "2026-05-11",
-    "total_return_pct": 883.49,
-    "cagr_pct": 16.06,
-    "max_drawdown_pct": -23.57,
+    "total_return_pct": 895.09,
+    "cagr_pct": 16.15,
+    "max_drawdown_pct": -23.61,
     "sharpe": 0.94
   },
   "summary": {
@@ -68,15 +68,15 @@
       "relative_spy_reasons": [
         "test drawdown was not better than SPY"
       ],
-      "selected_score": 124.62,
+      "selected_score": 122.6,
       "selected_overrides": {},
       "train": {
         "start": "2011-01-03",
         "end": "2016-12-30",
-        "total_return_pct": 130.43,
-        "cagr_pct": 14.95,
+        "total_return_pct": 126.99,
+        "cagr_pct": 14.66,
         "max_drawdown_pct": -16.07,
-        "sharpe": 0.9
+        "sharpe": 0.89
       },
       "train_spy": {
         "start": "2011-01-03",
@@ -89,10 +89,10 @@
       "test": {
         "start": "2017-01-03",
         "end": "2019-12-31",
-        "total_return_pct": 64.92,
-        "cagr_pct": 18.21,
-        "max_drawdown_pct": -23.57,
-        "sharpe": 1.09
+        "total_return_pct": 68.56,
+        "cagr_pct": 19.08,
+        "max_drawdown_pct": -23.61,
+        "sharpe": 1.13
       },
       "test_spy": {
         "start": "2017-01-03",
@@ -117,15 +117,15 @@
       "relative_spy_reasons": [
         "test return did not beat SPY"
       ],
-      "selected_score": 119.1,
+      "selected_score": 120.63,
       "selected_overrides": {},
       "train": {
         "start": "2011-01-03",
         "end": "2019-12-31",
-        "total_return_pct": 285.09,
-        "cagr_pct": 16.18,
-        "max_drawdown_pct": -23.57,
-        "sharpe": 0.97
+        "total_return_pct": 287.71,
+        "cagr_pct": 16.27,
+        "max_drawdown_pct": -23.61,
+        "sharpe": 0.98
       },
       "train_spy": {
         "start": "2011-01-03",
@@ -164,14 +164,14 @@
       "absolute_reasons": [],
       "relative_spy_passed": true,
       "relative_spy_reasons": [],
-      "selected_score": 118.35,
+      "selected_score": 118.79,
       "selected_overrides": {},
       "train": {
         "start": "2011-01-03",
         "end": "2021-12-31",
-        "total_return_pct": 364.33,
-        "cagr_pct": 14.99,
-        "max_drawdown_pct": -23.57,
+        "total_return_pct": 367.5,
+        "cagr_pct": 15.06,
+        "max_drawdown_pct": -23.61,
         "sharpe": 0.92
       },
       "train_spy": {
@@ -185,10 +185,10 @@
       "test": {
         "start": "2022-01-03",
         "end": "2022-12-30",
-        "total_return_pct": 6.42,
-        "cagr_pct": 6.49,
+        "total_return_pct": 8.21,
+        "cagr_pct": 8.31,
         "max_drawdown_pct": -6.55,
-        "sharpe": 0.65
+        "sharpe": 0.77
       },
       "test_spy": {
         "start": "2022-01-03",
@@ -214,15 +214,15 @@
         "test return did not beat SPY",
         "test drawdown was not better than SPY"
       ],
-      "selected_score": 130.22,
+      "selected_score": 133.21,
       "selected_overrides": {},
       "train": {
         "start": "2011-01-03",
         "end": "2022-12-30",
-        "total_return_pct": 400.91,
-        "cagr_pct": 14.38,
-        "max_drawdown_pct": -23.57,
-        "sharpe": 0.9
+        "total_return_pct": 412.82,
+        "cagr_pct": 14.61,
+        "max_drawdown_pct": -23.61,
+        "sharpe": 0.91
       },
       "train_spy": {
         "start": "2011-01-03",
@@ -235,10 +235,10 @@
       "test": {
         "start": "2023-01-03",
         "end": "2026-05-11",
-        "total_return_pct": 96.7,
-        "cagr_pct": 22.37,
+        "total_return_pct": 94.4,
+        "cagr_pct": 21.94,
         "max_drawdown_pct": -19.76,
-        "sharpe": 1.06
+        "sharpe": 1.04
       },
       "test_spy": {
         "start": "2023-01-03",

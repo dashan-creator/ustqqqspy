@@ -52,7 +52,7 @@ class BacktestConfig:
     repair_momentum_min: float = 0.03
     vix_risk_on: float = 24.0
     vix_risk_off: float = 28.0
-    repair_vix_max: float = 22.0
+    repair_vix_max: float = 24.0
     vix_backwardation_ratio: float = 1.0
     vix_backwardation_level: float = 28.0
     vvix_risk_off: float = 115.0

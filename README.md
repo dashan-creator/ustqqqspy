@@ -72,32 +72,32 @@ Latest checked result, using Yahoo daily data from 2011-01-03 to 2026-05-11 with
 
 | Case | Total Return | CAGR | Max Drawdown | Sharpe |
 | --- | ---: | ---: | ---: | ---: |
-| SPY/TQQQ allocation | 794.87% | 15.35% | -25.88% | 0.90 |
+| SPY/TQQQ allocation | 806.41% | 15.44% | -25.88% | 0.90 |
 | Buy-and-hold SPY | 662.73% | 14.15% | -33.72% | 0.86 |
 | Buy-and-hold TQQQ | 19968.91% | 41.25% | -81.66% | 0.87 |
 
 The stability gate passes only when the allocation beats buy-and-hold SPY, has lower drawdown
 than SPY and TQQQ, Sharpe is at least 0.80, and at least 80% of tested market regimes are profitable.
 The report also includes a stricter all-cycle profit gate based on continuous full-run equity slices.
-The current default passes that strict gate: the continuous 2022 inflation-bear slice is +6.42%.
+The current default passes that strict gate: the continuous 2022 inflation-bear slice is +8.21%.
 This is still a historical backtest and not a future profit guarantee.
 
 Continuous full-run regime slices for the current default:
 
 | Regime | Return | Max Drawdown |
 | --- | ---: | ---: |
-| 2011-2015 post-GFC bull | 102.46% | -15.44% |
-| 2016-2019 late-cycle chop | 72.66% | -25.88% |
+| 2011-2015 post-GFC bull | 99.57% | -15.88% |
+| 2016-2019 late-cycle chop | 76.55% | -25.88% |
 | 2020-2021 COVID crash/recovery | 17.81% | -17.62% |
-| 2022 inflation bear | 6.42% | -6.55% |
-| 2023-present AI/liquidity bull | 97.40% | -19.95% |
+| 2022 inflation bear | 8.21% | -6.55% |
+| 2023-present AI/liquidity bull | 95.08% | -19.95% |
 
 Default allocation policy:
 
 | State | Trigger | Allocation intent | Default target |
 | --- | --- | --- | --- |
 | Risk-on attack | SPY trend is above the 100/200-day filters, TQQQ 210-day momentum is positive, and VIX is controlled | Use TQQQ for upside capture with SPY as ballast | 65% SPY / 35% TQQQ |
-| Repair | Long trend is intact, panic is absent, and momentum is recovering | Rebuild exposure without full leverage | 80% SPY / 20% TQQQ |
+| Repair | Long trend is intact, panic is absent, momentum is recovering, and VIX is no higher than 24 | Rebuild exposure without full leverage | 80% SPY / 20% TQQQ |
 | Normal defense | Trend is not strong enough for attack, but inflation/panic filters are not active | Stay defensive inside equities | 60% SPY |
 | Risk-off | Trend, VIX/VVIX, VIX curve, or drawdown filters show broad stress | Leave equity beta and use defensive diversifiers | 40% UUP / 25% DBC |
 | Inflation stress | MOVE is elevated, SPY is below the 200-day filter, and drawdown exceeds the inflation threshold | Defend against rate/inflation shocks | 50% BIL / 25% UUP |
@@ -111,13 +111,13 @@ Allocation state exposure in the latest full backtest:
 | --- | ---: | ---: |
 | Risk-on attack | 2314 | 59.93% |
 | Risk-off | 784 | 20.31% |
-| Normal defense | 335 | 8.68% |
+| Normal defense | 324 | 8.39% |
 | Warmup | 210 | 5.44% |
-| Repair | 145 | 3.76% |
+| Repair | 156 | 4.04% |
 | Inflation stress | 73 | 1.89% |
 
-Average full-sample target weights were SPY 47.2%, TQQQ 21.7%, UUP 8.6%, DBC 5.1%, and BIL 0.9%,
-with 390 allocation-state changes.
+Average full-sample target weights were SPY 47.2%, TQQQ 21.8%, UUP 8.6%, DBC 5.1%, and BIL 0.9%,
+with 386 allocation-state changes.
 
 Robustness screen: a fast array-based checker perturbs core parameters and execution assumptions.
 The latest run passed 16 of 18 cases. Nearby trend, momentum, MOVE, inflation-drawdown, TQQQ-weight,
@@ -128,7 +128,7 @@ script as a fast screen; the official performance and gates come from `backtest_
 Walk-forward validation is more conservative. A 250-candidate parameter family is selected using only
 prior data for each fold and then tested on the next unseen window. The selector is regularized toward
 lower drawdown, higher Sharpe, and the default inflation-defense discipline. The latest run passed 4 of
-4 absolute out-of-sample stability folds, including +6.42% in the 2022 inflation-bear fold, but only 1
+4 absolute out-of-sample stability folds, including +8.21% in the 2022 inflation-bear fold, but only 1
 of 4 relative-to-SPY folds. The full-sample all-cycle pass is therefore a strong historical result, while
 future superiority versus SPY remains unproven in every validation window.
 
