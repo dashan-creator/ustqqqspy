@@ -60,6 +60,13 @@ cd backend
 python scripts/stress_test_spy_tqqq_cycle.py --output stress_spy_tqqq_cycle_results.json
 ```
 
+SPY/TQQQ walk-forward validation:
+
+```bash
+cd backend
+python scripts/walk_forward_spy_tqqq_cycle.py --output walk_forward_spy_tqqq_cycle_results.json
+```
+
 Latest checked result, using Yahoo daily data from 2011-01-03 to 2026-05-11 with 1 bp fees,
 2 bp slippage, and 2% annual cash yield:
 
@@ -117,6 +124,13 @@ The latest run passed 16 of 18 cases. Nearby trend, momentum, MOVE, inflation-dr
 zero-cash-yield, 5 bp slippage, and 5 bp fee scenarios held up. Failures concentrated in severe
 execution friction or delayed execution: 10 bp slippage and one-day execution delay. Treat the stress
 script as a fast screen; the official performance and gates come from `backtest_spy_tqqq_cycle.py`.
+
+Walk-forward validation is more conservative. A 250-candidate parameter family is selected using only
+prior data for each fold and then tested on the next unseen window. The latest run passed 3 of 4
+absolute out-of-sample stability folds, but only 1 of 4 relative-to-SPY folds. The 2022 inflation-bear
+fold remains the key weakness when selected strictly from pre-2022 data (-0.70% test return), so the
+full-sample all-cycle pass should be treated as a strong historical result rather than proof of robust
+future superiority.
 
 Frontend:
 

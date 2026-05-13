@@ -1,0 +1,261 @@
+{
+  "description": "Walk-forward parameter selection using only prior data for each validation fold.",
+  "candidate_count": 250,
+  "base_config": {
+    "initial_cash": 100000.0,
+    "spy_position_pct": 55.0,
+    "tqqq_position_pct": 35.0,
+    "max_hold_days": 25,
+    "fee_bps": 1.0,
+    "slippage_bps": 2.0,
+    "start": "2011-01-01",
+    "end": null,
+    "sma_fast": 100,
+    "sma_slow": 200,
+    "recent_high_days": 42,
+    "momentum_days": 210,
+    "risk_on_momentum_min": 0.0,
+    "repair_momentum_min": 0.03,
+    "vix_risk_on": 24.0,
+    "vix_risk_off": 28.0,
+    "repair_vix_max": 22.0,
+    "vix_backwardation_ratio": 1.0,
+    "vix_backwardation_level": 28.0,
+    "vvix_risk_off": 115.0,
+    "move_inflation_risk": 115.0,
+    "inflation_drawdown_pct": 10.0,
+    "inflation_sma": 200,
+    "tqqq_weight": 0.35,
+    "repair_tqqq_weight": 0.2,
+    "repair_spy_weight": 0.8,
+    "defensive_spy_weight": 0.6,
+    "drawdown_guard_pct": 20.0,
+    "cash_yield_pct": 2.0,
+    "hedge_symbol": "SH",
+    "hedge_weight": 0.0,
+    "risk_off_symbols": "UUP,DBC",
+    "risk_off_weights": "0.4,0.25",
+    "inflation_off_symbols": "BIL,UUP",
+    "inflation_off_weights": "0.5,0.25"
+  },
+  "default_full_sample": {
+    "start": "2011-01-03",
+    "end": "2026-05-11",
+    "total_return_pct": 883.49,
+    "cagr_pct": 16.06,
+    "max_drawdown_pct": -23.57,
+    "sharpe": 0.94
+  },
+  "summary": {
+    "folds": 4,
+    "absolute_passed_folds": 3,
+    "absolute_failed_folds": 1,
+    "relative_spy_passed_folds": 1,
+    "relative_spy_failed_folds": 3
+  },
+  "folds": [
+    {
+      "fold": {
+        "name": "late_cycle_validation",
+        "train_start": "2011-01-01",
+        "train_end": "2016-12-31",
+        "test_start": "2017-01-01",
+        "test_end": "2019-12-31"
+      },
+      "absolute_passed": true,
+      "absolute_reasons": [],
+      "relative_spy_passed": false,
+      "relative_spy_reasons": [
+        "test drawdown was not better than SPY"
+      ],
+      "selected_score": 112.78,
+      "selected_overrides": {},
+      "train": {
+        "start": "2011-01-03",
+        "end": "2016-12-30",
+        "total_return_pct": 130.43,
+        "cagr_pct": 14.95,
+        "max_drawdown_pct": -16.07,
+        "sharpe": 0.9
+      },
+      "train_spy": {
+        "start": "2011-01-03",
+        "end": "2016-12-30",
+        "total_return_pct": 99.11,
+        "cagr_pct": 12.18,
+        "max_drawdown_pct": -18.61,
+        "sharpe": 0.84
+      },
+      "test": {
+        "start": "2017-01-03",
+        "end": "2019-12-31",
+        "total_return_pct": 64.92,
+        "cagr_pct": 18.21,
+        "max_drawdown_pct": -23.57,
+        "sharpe": 1.09
+      },
+      "test_spy": {
+        "start": "2017-01-03",
+        "end": "2019-12-31",
+        "total_return_pct": 51.25,
+        "cagr_pct": 14.84,
+        "max_drawdown_pct": -19.35,
+        "sharpe": 1.14
+      }
+    },
+    {
+      "fold": {
+        "name": "covid_validation",
+        "train_start": "2011-01-01",
+        "train_end": "2019-12-31",
+        "test_start": "2020-01-01",
+        "test_end": "2021-12-31"
+      },
+      "absolute_passed": true,
+      "absolute_reasons": [],
+      "relative_spy_passed": false,
+      "relative_spy_reasons": [
+        "test return did not beat SPY"
+      ],
+      "selected_score": 116.71,
+      "selected_overrides": {},
+      "train": {
+        "start": "2011-01-03",
+        "end": "2019-12-31",
+        "total_return_pct": 285.09,
+        "cagr_pct": 16.18,
+        "max_drawdown_pct": -23.57,
+        "sharpe": 0.97
+      },
+      "train_spy": {
+        "start": "2011-01-03",
+        "end": "2019-12-31",
+        "total_return_pct": 203.46,
+        "cagr_pct": 13.14,
+        "max_drawdown_pct": -19.35,
+        "sharpe": 0.94
+      },
+      "test": {
+        "start": "2020-01-02",
+        "end": "2021-12-31",
+        "total_return_pct": 17.81,
+        "cagr_pct": 8.56,
+        "max_drawdown_pct": -17.62,
+        "sharpe": 0.59
+      },
+      "test_spy": {
+        "start": "2020-01-02",
+        "end": "2021-12-31",
+        "total_return_pct": 50.92,
+        "cagr_pct": 22.9,
+        "max_drawdown_pct": -33.72,
+        "sharpe": 0.94
+      }
+    },
+    {
+      "fold": {
+        "name": "inflation_bear_validation",
+        "train_start": "2011-01-01",
+        "train_end": "2021-12-31",
+        "test_start": "2022-01-01",
+        "test_end": "2022-12-31"
+      },
+      "absolute_passed": false,
+      "absolute_reasons": [
+        "test return was not positive",
+        "test Sharpe below 0.50"
+      ],
+      "relative_spy_passed": true,
+      "relative_spy_reasons": [],
+      "selected_score": 113.53,
+      "selected_overrides": {
+        "sma_fast": 80,
+        "move_inflation_risk": 125.0,
+        "inflation_drawdown_pct": 8.0,
+        "tqqq_weight": 0.4
+      },
+      "train": {
+        "start": "2011-01-03",
+        "end": "2021-12-31",
+        "total_return_pct": 390.14,
+        "cagr_pct": 15.56,
+        "max_drawdown_pct": -24.75,
+        "sharpe": 0.91
+      },
+      "train_spy": {
+        "start": "2011-01-03",
+        "end": "2021-12-31",
+        "total_return_pct": 362.25,
+        "cagr_pct": 14.94,
+        "max_drawdown_pct": -33.72,
+        "sharpe": 0.91
+      },
+      "test": {
+        "start": "2022-01-03",
+        "end": "2022-12-30",
+        "total_return_pct": -0.7,
+        "cagr_pct": -0.71,
+        "max_drawdown_pct": -7.31,
+        "sharpe": -0.0
+      },
+      "test_spy": {
+        "start": "2022-01-03",
+        "end": "2022-12-30",
+        "total_return_pct": -18.65,
+        "cagr_pct": -18.84,
+        "max_drawdown_pct": -24.5,
+        "sharpe": -0.74
+      }
+    },
+    {
+      "fold": {
+        "name": "ai_liquidity_validation",
+        "train_start": "2011-01-01",
+        "train_end": "2022-12-31",
+        "test_start": "2023-01-01",
+        "test_end": null
+      },
+      "absolute_passed": true,
+      "absolute_reasons": [],
+      "relative_spy_passed": false,
+      "relative_spy_reasons": [
+        "test return did not beat SPY",
+        "test drawdown was not better than SPY"
+      ],
+      "selected_score": 135.05,
+      "selected_overrides": {},
+      "train": {
+        "start": "2011-01-03",
+        "end": "2022-12-30",
+        "total_return_pct": 400.91,
+        "cagr_pct": 14.38,
+        "max_drawdown_pct": -23.57,
+        "sharpe": 0.9
+      },
+      "train_spy": {
+        "start": "2011-01-03",
+        "end": "2022-12-30",
+        "total_return_pct": 278.23,
+        "cagr_pct": 11.74,
+        "max_drawdown_pct": -33.72,
+        "sharpe": 0.72
+      },
+      "test": {
+        "start": "2023-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 96.7,
+        "cagr_pct": 22.37,
+        "max_drawdown_pct": -19.76,
+        "sharpe": 1.06
+      },
+      "test_spy": {
+        "start": "2023-01-03",
+        "end": "2026-05-11",
+        "total_return_pct": 102.51,
+        "cagr_pct": 23.44,
+        "max_drawdown_pct": -18.76,
+        "sharpe": 1.47
+      }
+    }
+  ]
+}
