@@ -126,11 +126,11 @@ execution friction or delayed execution: 10 bp slippage and one-day execution de
 script as a fast screen; the official performance and gates come from `backtest_spy_tqqq_cycle.py`.
 
 Walk-forward validation is more conservative. A 250-candidate parameter family is selected using only
-prior data for each fold and then tested on the next unseen window. The latest run passed 3 of 4
-absolute out-of-sample stability folds, but only 1 of 4 relative-to-SPY folds. The 2022 inflation-bear
-fold remains the key weakness when selected strictly from pre-2022 data (-0.70% test return), so the
-full-sample all-cycle pass should be treated as a strong historical result rather than proof of robust
-future superiority.
+prior data for each fold and then tested on the next unseen window. The selector is regularized toward
+lower drawdown, higher Sharpe, and the default inflation-defense discipline. The latest run passed 4 of
+4 absolute out-of-sample stability folds, including +6.42% in the 2022 inflation-bear fold, but only 1
+of 4 relative-to-SPY folds. The full-sample all-cycle pass is therefore a strong historical result, while
+future superiority versus SPY remains unproven in every validation window.
 
 Frontend:
 

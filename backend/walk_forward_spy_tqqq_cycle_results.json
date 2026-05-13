@@ -48,8 +48,8 @@
   },
   "summary": {
     "folds": 4,
-    "absolute_passed_folds": 3,
-    "absolute_failed_folds": 1,
+    "absolute_passed_folds": 4,
+    "absolute_failed_folds": 0,
     "relative_spy_passed_folds": 1,
     "relative_spy_failed_folds": 3
   },
@@ -68,7 +68,7 @@
       "relative_spy_reasons": [
         "test drawdown was not better than SPY"
       ],
-      "selected_score": 112.78,
+      "selected_score": 124.62,
       "selected_overrides": {},
       "train": {
         "start": "2011-01-03",
@@ -117,7 +117,7 @@
       "relative_spy_reasons": [
         "test return did not beat SPY"
       ],
-      "selected_score": 116.71,
+      "selected_score": 119.1,
       "selected_overrides": {},
       "train": {
         "start": "2011-01-03",
@@ -160,27 +160,19 @@
         "test_start": "2022-01-01",
         "test_end": "2022-12-31"
       },
-      "absolute_passed": false,
-      "absolute_reasons": [
-        "test return was not positive",
-        "test Sharpe below 0.50"
-      ],
+      "absolute_passed": true,
+      "absolute_reasons": [],
       "relative_spy_passed": true,
       "relative_spy_reasons": [],
-      "selected_score": 113.53,
-      "selected_overrides": {
-        "sma_fast": 80,
-        "move_inflation_risk": 125.0,
-        "inflation_drawdown_pct": 8.0,
-        "tqqq_weight": 0.4
-      },
+      "selected_score": 118.35,
+      "selected_overrides": {},
       "train": {
         "start": "2011-01-03",
         "end": "2021-12-31",
-        "total_return_pct": 390.14,
-        "cagr_pct": 15.56,
-        "max_drawdown_pct": -24.75,
-        "sharpe": 0.91
+        "total_return_pct": 364.33,
+        "cagr_pct": 14.99,
+        "max_drawdown_pct": -23.57,
+        "sharpe": 0.92
       },
       "train_spy": {
         "start": "2011-01-03",
@@ -193,10 +185,10 @@
       "test": {
         "start": "2022-01-03",
         "end": "2022-12-30",
-        "total_return_pct": -0.7,
-        "cagr_pct": -0.71,
-        "max_drawdown_pct": -7.31,
-        "sharpe": -0.0
+        "total_return_pct": 6.42,
+        "cagr_pct": 6.49,
+        "max_drawdown_pct": -6.55,
+        "sharpe": 0.65
       },
       "test_spy": {
         "start": "2022-01-03",
@@ -222,7 +214,7 @@
         "test return did not beat SPY",
         "test drawdown was not better than SPY"
       ],
-      "selected_score": 135.05,
+      "selected_score": 130.22,
       "selected_overrides": {},
       "train": {
         "start": "2011-01-03",

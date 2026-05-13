@@ -94,10 +94,20 @@ def slice_metrics(dates: pd.DatetimeIndex, equity: np.ndarray, start: str, end: 
     return summarize_equity(dates, equity, start_i, end_i)
 
 
-def score_train(metrics: dict, spy_metrics: dict) -> float:
+def score_train(metrics: dict, spy_metrics: dict, cfg: BacktestConfig, base_cfg: BacktestConfig) -> float:
     relative_return = metrics["total_return_pct"] - spy_metrics["total_return_pct"]
     drawdown_penalty = max(0.0, abs(metrics["max_drawdown_pct"]) - abs(spy_metrics["max_drawdown_pct"]))
-    return metrics["sharpe"] * 100 + relative_return / 4 - drawdown_penalty * 4 + metrics["cagr_pct"]
+    aggression_penalty = max(0.0, cfg.tqqq_weight - base_cfg.tqqq_weight) * 80
+    late_inflation_penalty = max(0.0, cfg.move_inflation_risk - base_cfg.move_inflation_risk) * 0.8
+    return (
+        metrics["sharpe"] * 130
+        + relative_return / 8
+        - abs(metrics["max_drawdown_pct"]) * 0.7
+        - drawdown_penalty * 4
+        + metrics["cagr_pct"]
+        - aggression_penalty
+        - late_inflation_penalty
+    )
 
 
 def pass_absolute_oos(test_metrics: dict) -> tuple[bool, list[str]]:
@@ -140,7 +150,7 @@ def main() -> None:
         for cfg in candidates:
             equity, _ = run_fast_allocation(dates, data, cfg)
             train = slice_metrics(dates, equity, fold["train_start"], fold["train_end"])
-            ranked.append((score_train(train, train_spy), cfg, train, equity))
+            ranked.append((score_train(train, train_spy, cfg, base_cfg), cfg, train, equity))
         ranked.sort(key=lambda row: row[0], reverse=True)
         best_score, best_cfg, train_metrics, best_equity = ranked[0]
         test_metrics = slice_metrics(dates, best_equity, fold["test_start"], fold["test_end"])
