@@ -47,7 +47,7 @@ class BacktestConfig:
     sma_fast: int = 100
     sma_slow: int = 200
     recent_high_days: int = 42
-    momentum_days: int = 180
+    momentum_days: int = 210
     risk_on_momentum_min: float = 0.0
     repair_momentum_min: float = 0.03
     vix_risk_on: float = 24.0
