@@ -322,14 +322,14 @@ def run_backtest(data: dict[str, pd.DataFrame], cfg: BacktestConfig, strategy: S
     return summarize(cfg.initial_cash, cash, equity_curve, trades, dates[0], last_date)
 
 
-def target_weights(data: dict[str, pd.DataFrame], date: pd.Timestamp, cfg: BacktestConfig) -> dict[str, float]:
+def allocation_state(data: dict[str, pd.DataFrame], date: pd.Timestamp, cfg: BacktestConfig) -> tuple[str, dict[str, float]]:
     universe = strategy_universe(cfg)
     zero = {ticker: 0.0 for ticker in universe}
     spy = data["SPY"].loc[data["SPY"].index <= date]
     tqqq = data["TQQQ"].loc[data["TQQQ"].index <= date]
     min_bars = max(cfg.sma_slow, cfg.momentum_days, cfg.recent_high_days, cfg.inflation_sma)
     if len(spy) <= min_bars or len(tqqq) <= cfg.momentum_days:
-        return zero
+        return "warmup", zero
 
     spy_close = spy["close"]
     tqqq_close = tqqq["close"]
@@ -378,22 +378,27 @@ def target_weights(data: dict[str, pd.DataFrame], date: pd.Timestamp, cfg: Backt
     if inflation_stress:
         weights = dict(zero)
         weights.update(inflation_off_weights)
-        return weights
+        return "inflation_stress", weights
     if panic or not long_trend:
         weights = dict(zero)
         weights[cfg.hedge_symbol] = hedge_weight
         weights.update(risk_off_weights)
-        return weights
+        return "risk_off", weights
     if risk_on:
         weights = dict(zero)
         weights.update({"SPY": max(0.0, 1.0 - cfg.tqqq_weight), "TQQQ": cfg.tqqq_weight})
-        return weights
+        return "risk_on_attack", weights
     if repair:
         weights = dict(zero)
         weights.update({"SPY": cfg.repair_spy_weight, "TQQQ": cfg.repair_tqqq_weight})
-        return weights
+        return "repair", weights
     weights = dict(zero)
     weights["SPY"] = cfg.defensive_spy_weight
+    return "normal_defense", weights
+
+
+def target_weights(data: dict[str, pd.DataFrame], date: pd.Timestamp, cfg: BacktestConfig) -> dict[str, float]:
+    _, weights = allocation_state(data, date, cfg)
     return weights
 
 
@@ -410,11 +415,17 @@ def run_allocation_backtest(data: dict[str, pd.DataFrame], cfg: BacktestConfig) 
     trades: list[dict] = []
     equity_curve: list[dict] = []
     current_weights = {ticker: 0.0 for ticker in shares}
+    state_history: list[dict] = []
 
     for date in dates:
         cash *= 1 + (cfg.cash_yield_pct / 100) / 252
         value = cash + sum(shares[t] * latest_value(data, t, date, 0.0) for t in shares)
-        weights = target_weights(data, date, cfg)
+        state, weights = allocation_state(data, date, cfg)
+        state_history.append({
+            "date": date.date().isoformat(),
+            "state": state,
+            "weights": {ticker: round(weight, 4) for ticker, weight in weights.items() if abs(weight) > 0.0001},
+        })
         weights_changed = any(abs(weights[t] - current_weights[t]) > 0.001 for t in shares)
         is_weekly_rebalance = date.weekday() == 0
         if weights_changed or is_weekly_rebalance:
@@ -450,7 +461,38 @@ def run_allocation_backtest(data: dict[str, pd.DataFrame], cfg: BacktestConfig) 
     result = summarize(cfg.initial_cash, final_cash, equity_curve, [], dates[0], dates[-1])
     result["rebalance_trades"] = trades
     result["total_rebalances"] = len(trades)
+    result["state_history"] = state_history
+    result["state_exposure"] = summarize_state_exposure(state_history, strategy_universe(cfg))
     return result
+
+
+def summarize_state_exposure(state_history: list[dict], universe: list[str]) -> dict:
+    if not state_history:
+        return {"total_days": 0, "states": [], "average_weights": {}, "state_changes": 0}
+    total_days = len(state_history)
+    state_counts: dict[str, int] = {}
+    weight_sums = {ticker: 0.0 for ticker in universe}
+    previous_state = None
+    state_changes = 0
+    for row in state_history:
+        state = row["state"]
+        state_counts[state] = state_counts.get(state, 0) + 1
+        if previous_state is not None and state != previous_state:
+            state_changes += 1
+        previous_state = state
+        weights = row.get("weights", {})
+        for ticker in universe:
+            weight_sums[ticker] += float(weights.get(ticker, 0.0))
+    states = [
+        {"state": state, "days": days, "pct_days": round(days / total_days * 100, 2)}
+        for state, days in sorted(state_counts.items(), key=lambda item: (-item[1], item[0]))
+    ]
+    average_weights = {
+        ticker: round(total / total_days, 4)
+        for ticker, total in weight_sums.items()
+        if abs(total) > 0.0001
+    }
+    return {"total_days": total_days, "states": states, "average_weights": average_weights, "state_changes": state_changes}
 
 
 def summarize(initial_cash: float, final_cash: float, equity_curve: list[dict], trades: list[dict], start: pd.Timestamp, end: pd.Timestamp) -> dict:
@@ -534,6 +576,7 @@ def allocation_regime_slices(data: dict[str, pd.DataFrame], cfg: BacktestConfig)
             result = run_allocation_backtest(data, sub_cfg)
             result.pop("rebalance_trades", None)
             result.pop("equity_curve", None)
+            result.pop("state_history", None)
             result["regime"] = name
             slices.append(result)
         except Exception as exc:
@@ -693,6 +736,16 @@ def print_summary(report: dict) -> None:
                 f"{r['regime']:<22} return={r['total_return_pct']:>8.2f}% "
                 f"DD={r['max_drawdown_pct']:>7.2f}%"
             )
+    state_exposure = report["strategy"].get("state_exposure")
+    if state_exposure:
+        print("\nAllocation state exposure")
+        for row in state_exposure["states"]:
+            print(f"{row['state']:<22} days={row['days']:>4} pct={row['pct_days']:>6.2f}%")
+        weights = ", ".join(
+            f"{ticker}={weight * 100:.1f}%" for ticker, weight in state_exposure["average_weights"].items()
+        )
+        print(f"average weights: {weights}")
+        print(f"state changes: {state_exposure['state_changes']}")
     gate = report["stability_gate"]
     print("\nStability gate:", "PASS" if gate["passed"] else "FAIL")
     for reason in gate["reasons"]:
@@ -716,12 +769,20 @@ def print_summary(report: dict) -> None:
 
 def compact_report(report: dict) -> dict:
     compact = dict(report)
-    compact["strategy"] = {k: v for k, v in report["strategy"].items() if k not in {"trades", "equity_curve", "rebalance_trades"}}
+    compact["strategy"] = {
+        k: v
+        for k, v in report["strategy"].items()
+        if k not in {"trades", "equity_curve", "rebalance_trades", "state_history"}
+    }
     if "top_grid" in compact:
         compact["top_grid"] = [
             {
                 **row,
-                "result": {k: v for k, v in row["result"].items() if k not in {"trades", "equity_curve", "rebalance_trades"}},
+                "result": {
+                    k: v
+                    for k, v in row["result"].items()
+                    if k not in {"trades", "equity_curve", "rebalance_trades", "state_history"}
+                },
             }
             for row in compact["top_grid"]
         ]

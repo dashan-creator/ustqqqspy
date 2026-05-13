@@ -50,7 +50,50 @@
     "win_rate_pct": 0.0,
     "profit_factor": null,
     "avg_trade_pct": 0.0,
-    "total_rebalances": 2085
+    "total_rebalances": 2085,
+    "state_exposure": {
+      "total_days": 3861,
+      "states": [
+        {
+          "state": "risk_on_attack",
+          "days": 2264,
+          "pct_days": 58.64
+        },
+        {
+          "state": "risk_off",
+          "days": 792,
+          "pct_days": 20.51
+        },
+        {
+          "state": "normal_defense",
+          "days": 398,
+          "pct_days": 10.31
+        },
+        {
+          "state": "warmup",
+          "days": 200,
+          "pct_days": 5.18
+        },
+        {
+          "state": "repair",
+          "days": 134,
+          "pct_days": 3.47
+        },
+        {
+          "state": "inflation_stress",
+          "days": 73,
+          "pct_days": 1.89
+        }
+      ],
+      "average_weights": {
+        "SPY": 0.4708,
+        "TQQQ": 0.2122,
+        "UUP": 0.0868,
+        "DBC": 0.0513,
+        "BIL": 0.0095
+      },
+      "state_changes": 395
+    }
   },
   "buy_hold_spy": {
     "start": "2011-01-03",
@@ -96,6 +139,43 @@
       "avg_trade_pct": 0.0,
       "trades": [],
       "total_rebalances": 481,
+      "state_exposure": {
+        "total_days": 1258,
+        "states": [
+          {
+            "state": "risk_on_attack",
+            "days": 805,
+            "pct_days": 63.99
+          },
+          {
+            "state": "warmup",
+            "days": 200,
+            "pct_days": 15.9
+          },
+          {
+            "state": "risk_off",
+            "days": 114,
+            "pct_days": 9.06
+          },
+          {
+            "state": "normal_defense",
+            "days": 85,
+            "pct_days": 6.76
+          },
+          {
+            "state": "repair",
+            "days": 54,
+            "pct_days": 4.29
+          }
+        ],
+        "average_weights": {
+          "SPY": 0.4908,
+          "TQQQ": 0.2326,
+          "UUP": 0.0362,
+          "DBC": 0.0227
+        },
+        "state_changes": 80
+      },
       "regime": "post_gfc_bull"
     },
     {
@@ -113,6 +193,38 @@
       "avg_trade_pct": 0.0,
       "trades": [],
       "total_rebalances": 503,
+      "state_exposure": {
+        "total_days": 1006,
+        "states": [
+          {
+            "state": "risk_on_attack",
+            "days": 637,
+            "pct_days": 63.32
+          },
+          {
+            "state": "normal_defense",
+            "days": 169,
+            "pct_days": 16.8
+          },
+          {
+            "state": "risk_off",
+            "days": 152,
+            "pct_days": 15.11
+          },
+          {
+            "state": "repair",
+            "days": 48,
+            "pct_days": 4.77
+          }
+        ],
+        "average_weights": {
+          "SPY": 0.5505,
+          "TQQQ": 0.2312,
+          "UUP": 0.0604,
+          "DBC": 0.0378
+        },
+        "state_changes": 100
+      },
       "regime": "late_cycle_chop"
     },
     {
@@ -130,6 +242,44 @@
       "avg_trade_pct": 0.0,
       "trades": [],
       "total_rebalances": 479,
+      "state_exposure": {
+        "total_days": 505,
+        "states": [
+          {
+            "state": "risk_off",
+            "days": 240,
+            "pct_days": 47.52
+          },
+          {
+            "state": "risk_on_attack",
+            "days": 209,
+            "pct_days": 41.39
+          },
+          {
+            "state": "normal_defense",
+            "days": 44,
+            "pct_days": 8.71
+          },
+          {
+            "state": "inflation_stress",
+            "days": 11,
+            "pct_days": 2.18
+          },
+          {
+            "state": "repair",
+            "days": 1,
+            "pct_days": 0.2
+          }
+        ],
+        "average_weights": {
+          "SPY": 0.3229,
+          "TQQQ": 0.1452,
+          "UUP": 0.1955,
+          "DBC": 0.1188,
+          "BIL": 0.0109
+        },
+        "state_changes": 104
+      },
       "regime": "covid_crash_recovery"
     },
     {
@@ -147,6 +297,39 @@
       "avg_trade_pct": 0.0,
       "trades": [],
       "total_rebalances": 139,
+      "state_exposure": {
+        "total_days": 251,
+        "states": [
+          {
+            "state": "risk_off",
+            "days": 175,
+            "pct_days": 69.72
+          },
+          {
+            "state": "inflation_stress",
+            "days": 50,
+            "pct_days": 19.92
+          },
+          {
+            "state": "normal_defense",
+            "days": 20,
+            "pct_days": 7.97
+          },
+          {
+            "state": "risk_on_attack",
+            "days": 6,
+            "pct_days": 2.39
+          }
+        ],
+        "average_weights": {
+          "SPY": 0.0633,
+          "TQQQ": 0.0084,
+          "UUP": 0.3287,
+          "DBC": 0.1743,
+          "BIL": 0.0996
+        },
+        "state_changes": 29
+      },
       "regime": "inflation_bear"
     },
     {
@@ -164,6 +347,44 @@
       "avg_trade_pct": 0.0,
       "trades": [],
       "total_rebalances": 489,
+      "state_exposure": {
+        "total_days": 841,
+        "states": [
+          {
+            "state": "risk_on_attack",
+            "days": 607,
+            "pct_days": 72.18
+          },
+          {
+            "state": "risk_off",
+            "days": 111,
+            "pct_days": 13.2
+          },
+          {
+            "state": "normal_defense",
+            "days": 80,
+            "pct_days": 9.51
+          },
+          {
+            "state": "repair",
+            "days": 31,
+            "pct_days": 3.69
+          },
+          {
+            "state": "inflation_stress",
+            "days": 12,
+            "pct_days": 1.43
+          }
+        ],
+        "average_weights": {
+          "SPY": 0.5557,
+          "TQQQ": 0.26,
+          "UUP": 0.0564,
+          "DBC": 0.033,
+          "BIL": 0.0071
+        },
+        "state_changes": 82
+      },
       "regime": "ai_liquidity_bull"
     }
   ],

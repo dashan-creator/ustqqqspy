@@ -98,6 +98,20 @@ Default allocation policy:
 In short: TQQQ is the attack sleeve, SPY is the normal equity defense sleeve, and BIL/UUP plus
 UUP/DBC are reserved for regimes where SPY itself has not historically been defensive enough.
 
+Allocation state exposure in the latest full backtest:
+
+| State | Days | Share of Days |
+| --- | ---: | ---: |
+| Risk-on attack | 2264 | 58.64% |
+| Risk-off | 792 | 20.51% |
+| Normal defense | 398 | 10.31% |
+| Warmup | 200 | 5.18% |
+| Repair | 134 | 3.47% |
+| Inflation stress | 73 | 1.89% |
+
+Average full-sample target weights were SPY 47.1%, TQQQ 21.2%, UUP 8.7%, DBC 5.1%, and BIL 0.9%,
+with 395 allocation-state changes.
+
 Robustness screen: a fast array-based checker perturbs core parameters and execution assumptions.
 The latest run passed 12 of 18 cases. Nearby trend, momentum, MOVE, inflation-drawdown, TQQQ-weight,
 and zero-cash-yield scenarios mostly held up. Failures concentrated in high execution friction
